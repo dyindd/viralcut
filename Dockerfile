@@ -5,7 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # repo is flat: rebuild the app/ package layout inside the image
 COPY *.py /srv/app/
-COPY index.html /srv/app/static/index.html
+COPY index*.html /srv/app/static/index.html
 ENV RECUT_DATA=/data
 VOLUME /data
 EXPOSE 8000
