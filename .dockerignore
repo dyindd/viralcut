@@ -1,0 +1,4 @@
+tests/samples
+data
+__pycache__
+.venv

@@ -1,0 +1,28 @@
+# One-click deploy on Render.com: New + > Blueprint > pick this repo.
+services:
+  - type: web
+    name: viralcut
+    runtime: docker
+    plan: standard          # needs real CPU for FFmpeg; "starter" works for light testing
+    healthCheckPath: /api/config
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 20
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_STARTER
+        sync: false
+      - key: STRIPE_PRICE_PRO
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
+      - key: RECUT_WORKERS
+        value: "2"
