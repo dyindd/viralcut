@@ -1,0 +1,53 @@
+{
+  "name": "StealAPresent",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Shared": { "$path": "src/shared" },
+      "Models": {
+        "$className": "Folder",
+        "Presents": { "$className": "Folder" },
+        "Boxes": { "$className": "Folder" },
+        "Traps": { "$className": "Folder" }
+      }
+    },
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "Server": { "$path": "src/server" }
+    },
+
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "$properties": { "CharacterWalkSpeed": 16 },
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "Client": { "$path": "src/client" }
+      }
+    },
+
+    "Workspace": {
+      "$className": "Workspace",
+      "$properties": { "FilteringEnabled": true }
+    },
+
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "Brightness": 2.5,
+        "ClockTime": 14.5,
+        "Ambient": [0.55, 0.6, 0.7],
+        "OutdoorAmbient": [0.6, 0.65, 0.75],
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 1
+      }
+    },
+
+    "SoundService": {
+      "$className": "SoundService",
+      "$properties": { "RespectFilteringEnabled": true }
+    }
+  }
+}
