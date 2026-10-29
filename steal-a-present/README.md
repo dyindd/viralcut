@@ -57,7 +57,9 @@ src/
     Registry.lua       service locator (no circular requires)
     RateLimiter.lua    per-player per-remote throttling
     Validate.lua       argument + distance checks (never trust the client)
-    WorldBuilder.lua   generates the hub, conveyor, season tree and the ring of 8 bases
+    WorldBuilder.lua   generates the North Pole hub (workshop, giant tree, lamp posts, snowmen, igloos, paths) and the ring of 8 fenced cottage bases
+    Decor.lua          procedural Christmas models from plain Parts: trees with lights, snowmen, lamp posts, candy canes, gingerbread houses, present piles, igloos, fences, padlock, mailbox, gym set, training barbell
+    Environment.lua    sky/lighting/atmosphere/bloom/color correction/sun rays, clouds, snowy terrain mountains + frozen lake, animated aurora, snowfall
     Services/
       DataService         DataStore with session locking, autosave, BindToClose, schema migrations, Studio mock
       PlotService         base assignment, slots, lock/shield, sign, pad touches → other services
@@ -160,8 +162,15 @@ python3 tests/econ_sim.py
 * Deposits that imply travelling faster than `Config.AntiCheat.MaxTravelSpeed` (teleport exploits) are refused and the present goes home; the player is flagged in `Stats.Flags`.
 * Stealing is strength-gated (2x the present's weight), so a brand-new account can't be farmed for its Legendary by a veteran unless the veteran is the Grinch.
 
-## 6. What's stubbed or placeholder
-* **Art**: boxes, presents, traps, the map and the tools are generated Parts. Drop models into `ReplicatedStorage.Models.*` to replace them (see `docs/STUDIO_CHECKLIST.md`).
+## 6. Visual layer (all code, swap for meshes any time)
+* The whole world is procedural: `Decor.lua` builds every tree, snowman, lamp post, cottage and candy cane from Parts, `Environment.lua` sets the golden-hour winter lighting, atmosphere, bloom, clouds, generates snowy terrain mountains and a frozen lake, and animates an aurora. Each decoration is one function, so replacing e.g. `Decor.Tree` with a mesh clone changes every tree in the game.
+* Presents at bases float and spin (client-side), Rare+ get a neon ring, Legendary+ a light pillar and sparkles.
+* Training equips a barbell tool so the character actually lifts (the tool pose raises the arm; the grip pumps), with sweat particles and a "💪 TRAINING" tag.
+* The padlock lamp on every base turns green while locked, red when open.
+* UI: shine sweeps on buttons, spinning light rays behind the unwrap reveal, floating "+$x" pops, a rainbow outline on Rewards while something is claimable, gradient panel bodies and titles.
+
+## 7. What's stubbed or placeholder
+* **Art**: boxes, presents and traps are generated Parts. Drop models into `ReplicatedStorage.Models.*` to replace them (see `docs/STUDIO_CHECKLIST.md`). Icons are emoji until you add images.
 * **Sounds**: `Config.Sounds` has library IDs that may be silent/moderated; replace with your own.
 * **Icons**: UI uses emoji; `UIKit.IconButton` takes an `Image` to swap.
 * **Base lock** is enforced by the server (steals are refused), not by a physical wall — simpler and exploit-proof, but thieves can still walk through a locked base.

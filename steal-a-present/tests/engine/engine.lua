@@ -19,6 +19,7 @@ local services = {}
 local function service(className, name)
 	local s = newInstance(className)
 	s._props.Name = name or className
+	rawset(s, "_isService", true)
 	rawset(s, "_parent", game)
 	table.insert(game._children, s)
 	services[name or className] = s
@@ -71,7 +72,8 @@ end
 camera._props.WorldToViewportPoint = function(self, pos) return project(self, pos) end
 camera._props.WorldToScreenPoint = function(self, pos) return project(self, pos) end
 camera._props.ViewportPointToRay = function(self, x, y) return { Origin = self._props.CFrame.Position, Direction = self._props.CFrame.LookVector } end
-Workspace._props.Terrain = newInstance("Terrain")
+local terrain = newInstance("Terrain") terrain._props.Name = "Terrain" terrain.Parent = Workspace
+Workspace._props.Terrain = terrain
 
 function game.GetService(_, name)
 	local s = services[name]

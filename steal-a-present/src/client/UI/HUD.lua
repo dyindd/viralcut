@@ -186,6 +186,8 @@ function HUD.Build()
 	end
 	local rewardsBtn = UIKit.Button({ Text = "Rewards", Icon = "🎁", Color = Theme.Colors.Green, Size = UDim2.new(0, 220, 0, 64), TextSize = 32, LayoutOrder = 10, Parent = right,
 		OnClick = function() HUD.TogglePanel("Rewards") end })
+	UIKit.Shine(rewardsBtn, 3)
+	HUD.RewardsStroke = rewardsBtn:FindFirstChildOfClass("UIStroke")
 	HUD.RewardsBadge = UIKit.Create("Frame", { Size = UDim2.new(0, 30, 0, 30), Position = UDim2.new(1, -4, 0, -4), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Theme.Colors.Red, Visible = false, ZIndex = 5, Parent = rewardsBtn })
 	UIKit.Corner(HUD.RewardsBadge, 15)
 	UIKit.Stroke(HUD.RewardsBadge, 2.5)
@@ -224,8 +226,15 @@ end
 ---------------------------------------------------------------------------
 local RANKS = { "Elf Trainee", "Gift Wrapper", "Sleigh Loader", "Chimney Pro", "Toy Master", "North Pole Boss", "Santa's Rival", "Present King", "Grinch Slayer", "Master" }
 
+local lastCash
 local function updateProfile(profile)
 	if not profile then return end
+	-- floating "+$x" when cash goes up
+	if lastCash and profile.Cash > lastCash + 0.5 then
+		local pillPos = HUD.CashPill.Frame.AbsolutePosition
+		UIKit.FloatText(HUD.Gui, "+$" .. Util.FormatNumber(profile.Cash - lastCash), Theme.Colors.Cash, UDim2.new(0, pillPos.X + 180, 0, pillPos.Y + 20))
+	end
+	lastCash = profile.Cash
 	HUD.CashPill.Value.Text = "$" .. Util.FormatNumber(profile.Cash)
 	HUD.SnowPill.Value.Text = Util.FormatNumber(profile.Snowflakes)
 	HUD.StrengthPill.Value.Text = Util.FormatNumber(profile.Strength) .. " STR"
@@ -239,6 +248,17 @@ local function updateProfile(profile)
 	HUD.RewardsBadge.Visible = ready > 0
 	HUD.RewardsBadgeText.Text = tostring(ready)
 	buttons.Rewards.SetBadge(ready > 0 and ready or nil)
+	-- rainbow outline on the Rewards button while something is claimable
+	if HUD.RewardsStroke then
+		local rainbow = HUD.RewardsStroke:FindFirstChildOfClass("UIGradient")
+		if ready > 0 and not rainbow then
+			UIKit.Rainbow(HUD.RewardsStroke, 0.8)
+			HUD.RewardsStroke.Thickness = 5
+		elseif ready == 0 and rainbow then
+			rainbow:Destroy()
+			HUD.RewardsStroke.Thickness = Theme.Stroke
+		end
+	end
 	-- tutorial objective
 	local tut = profile.Tutorial
 	if Config.Tutorial.Enabled and tut and not tut.Finished then

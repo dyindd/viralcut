@@ -65,7 +65,8 @@ local PARENT = {
 	Lighting = "Instance", SoundService = "Instance", RunService = "Instance", DataStoreService = "Instance", HttpService = "Instance", MarketplaceService = "Instance",
 	Debris = "Instance", TweenService = "Instance", UserInputService = "Instance", Camera = "Instance", Mouse = "Instance", CoreGui = "Instance", TextChatService = "Instance",
 	CollectionService = "Instance", TeleportService = "Instance", BadgeService = "Instance", Chat = "Instance", Teams = "Instance", PhysicsService = "Instance", GuiService = "Instance", ContextActionService = "Instance",
-	Atmosphere = "Instance", Sky = "Instance", BloomEffect = "Instance", ColorCorrectionEffect = "Instance",
+	Atmosphere = "Instance", Sky = "Instance", PostEffect = "Instance", BloomEffect = "PostEffect", ColorCorrectionEffect = "PostEffect", SunRaysEffect = "PostEffect", DepthOfFieldEffect = "PostEffect", BlurEffect = "PostEffect",
+	Clouds = "Instance", JointInstance = "Instance", Weld = "JointInstance", Motor6D = "JointInstance", Decal = "Instance", Texture = "Decal", CornerWedgePart = "BasePart", Animation = "Instance", AnimationController = "Instance",
 }
 
 local function isA(class, target)
@@ -127,6 +128,14 @@ local PROPS = {
 	Player = { Character = 1, UserId = 1, DisplayName = 1, Team = 1, TeamColor = 1, Neutral = 1, CharacterAppearanceId = 1, RespawnLocation = 1, CameraMode = 1, CameraMaxZoomDistance = 1, CameraMinZoomDistance = 1, DevComputerMovementMode = 1, DevTouchMovementMode = 1, DevEnableMouseLock = 1, HealthDisplayDistance = 1, NameDisplayDistance = 1, AutoJumpEnabled = 1, ReplicationFocus = 1, CanLoadCharacterAppearance = 1, AccountAge = 1, MembershipType = 1, LocaleId = 1 },
 	MarketplaceService = { ProcessReceipt = 1 },
 	Atmosphere = { Density = 1, Offset = 1, Color = 1, Decay = 1, Glare = 1, Haze = 1 },
+	Clouds = { Cover = 1, Density = 1, Color = 1, Enabled = 1 },
+	Sky = { StarCount = 1, CelestialBodiesShown = 1, SunAngularSize = 1, MoonAngularSize = 1, SkyboxBk = 1, SkyboxDn = 1, SkyboxFt = 1, SkyboxLf = 1, SkyboxRt = 1, SkyboxUp = 1, SunTextureId = 1, MoonTextureId = 1 },
+	PostEffect = { Enabled = 1 }, BloomEffect = { Intensity = 1, Size = 1, Threshold = 1 }, ColorCorrectionEffect = { Brightness = 1, Contrast = 1, Saturation = 1, TintColor = 1 },
+	SunRaysEffect = { Intensity = 1, Spread = 1 }, DepthOfFieldEffect = { FarIntensity = 1, FocusDistance = 1, InFocusRadius = 1, NearIntensity = 1 }, BlurEffect = { Size = 1 },
+	JointInstance = { Part0 = 1, Part1 = 1, C0 = 1, C1 = 1, Enabled = 1 }, Motor6D = { CurrentAngle = 1, DesiredAngle = 1, MaxVelocity = 1 },
+	Decal = { Texture = 1, Color3 = 1, Transparency = 1, Face = 1, ZIndex = 1 }, Texture = { StudsPerTileU = 1, StudsPerTileV = 1, OffsetStudsU = 1, OffsetStudsV = 1 },
+	Animation = { AnimationId = 1 }, Fire = { Size = 1, Heat = 1, Color = 1, SecondaryColor = 1, Enabled = 1 }, Smoke = { Size = 1, Opacity = 1, RiseVelocity = 1, Color = 1, Enabled = 1 },
+	Beam = { Attachment0 = 1, Attachment1 = 1, Color = 1, Transparency = 1, Width0 = 1, Width1 = 1, LightEmission = 1, LightInfluence = 1, Texture = 1, TextureSpeed = 1, TextureLength = 1, Segments = 1, CurveSize0 = 1, CurveSize1 = 1, FaceCamera = 1, Enabled = 1, ZOffset = 1, Brightness = 1, TextureMode = 1 },
 }
 local function propAllowed(class, key)
 	if type(key) ~= "string" or key:sub(1, 1) == "_" then return true end
@@ -177,6 +186,10 @@ local DEFAULTS = {
 	Attachment = function(p) p.Position = Vector3.new() p.CFrame = CFrame.new() end,
 	WeldConstraint = function(p) p.Enabled = true end,
 	Camera = function(p) p.CFrame = CFrame.new(0, 10, 20) p.ViewportSize = Vector2.new(1920, 1080) p.FieldOfView = 70 end,
+	Clouds = function(p) p.Cover = 0.5 p.Density = 0.7 p.Color = Color3.new(1, 1, 1) p.Enabled = true end,
+	JointInstance = function(p) p.C0 = CFrame.new() p.C1 = CFrame.new() p.Enabled = true end,
+	PostEffect = function(p) p.Enabled = true end,
+	Smoke = function(p) p.Size = 1 p.Opacity = 0.5 p.RiseVelocity = 1 p.Color = Color3.new(1, 1, 1) p.Enabled = true end,
 	SpawnLocation = function(p) p.Neutral = true p.Duration = 10 p.Enabled = true end,
 	Player = function(p) p.Character = nil p.UserId = 0 p.DisplayName = "" p.Neutral = true p.AccountAge = 30 end,
 }
@@ -322,7 +335,7 @@ InstanceMT.__newindex = function(inst, k, v)
 		inst._props.CFrame = CFrame.new(v.X, v.Y, v.Z) * old.Rotation
 		k = "CFrame" v = inst._props.CFrame
 	else
-		if type(v) ~= "function" and not propAllowed(class, k) and not EVENTS[k] and not isA(class, "ServiceProvider") and not PROPS[class] == nil then
+		if type(v) ~= "function" and not propAllowed(class, k) and not EVENTS[k] and not rawget(inst, "_isService") then
 			local key = class .. "." .. tostring(k)
 			Engine_unknownProps[key] = (Engine_unknownProps[key] or 0) + 1
 		end
@@ -470,6 +483,25 @@ function Methods.Stop(inst) inst._props.IsPlaying = false inst._props.Playing = 
 function Methods.Pause(inst) inst._props.IsPlaying = false end
 function Methods.ChangeState() end
 function Methods.GetState() return Enum.HumanoidStateType.Running end
+function Methods.EquipTool(inst, tool)
+	local char = inst._parent
+	if char and tool then tool.Parent = char if tool._signals.Equipped then tool._signals.Equipped:Fire() end end
+end
+function Methods.UnequipTools(inst)
+	local char = inst._parent
+	local player = char and rawget(char, "_player")
+	local backpack = player and player:FindFirstChildOfClass("Backpack")
+	if not char then return end
+	for _, c in ipairs(char:GetChildren()) do
+		if c._class == "Tool" then c.Parent = backpack end
+	end
+end
+function Methods.FillBlock() end
+function Methods.FillBall() end
+function Methods.FillCylinder() end
+function Methods.FillRegion() end
+function Methods.Clear() end
+function Methods.SetMaterialColor() end
 function Methods.TakeDamage(inst, n) inst.Health = math.max(0, inst._props.Health - n) if inst._props.Health <= 0 then inst.Died:Fire() end end
 function Methods.LoadAnimation() return { Play = function() end, Stop = function() end } end
 function Methods.AddTag() end

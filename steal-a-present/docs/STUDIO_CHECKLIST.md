@@ -23,6 +23,7 @@ The code builds the whole map at runtime, so the only manual work is settings, I
 16. **Run the tests before every update**: `python3 tests/run_scenarios.py` boots the real server and client here, no Studio needed (see `docs/TESTING.md`).
 
 ## Optional but recommended
-* Add a `Lighting` Atmosphere / SkyBox for the winter look (the project JSON only sets brightness/ambient).
+* **Graphics**: `default.project.json` sets `Lighting.Technology = Future`; in Studio set the quality level to 10+ (File → Studio Settings → Rendering) to see bloom, shadows and the atmosphere the way players on good devices will. The terrain mountains, aurora and clouds are generated at runtime by `Environment.lua`, so there is nothing to place by hand.
+* To add a custom skybox, create a `Sky` in Lighting with your textures and delete the `fx("Sky", ...)` line in `Environment.ApplyLighting`.
 * Replace the emoji icons in the UI with images: every `UIKit.IconButton` accepts `Image = "rbxassetid://..."`.
 * Set up a group so you can add developers and split revenue.

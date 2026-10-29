@@ -94,6 +94,72 @@ function UIKit.Rainbow(parent, speed)
 	return g
 end
 
+-- A diagonal white "shine" that sweeps across the element every `interval` seconds (PS99 buttons do this)
+function UIKit.Shine(target, interval)
+	local shine = UIKit.Create("Frame", {
+		Name = "Shine", Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0,
+		ZIndex = (target.ZIndex or 1) + 1, Parent = target,
+	})
+	local corner = target:FindFirstChildOfClass("UICorner")
+	if corner then UIKit.Corner(shine, corner.CornerRadius.Offset) end
+	local grad = UIKit.Create("UIGradient", {
+		Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.45, 1), NumberSequenceKeypoint.new(0.5, 0.55), NumberSequenceKeypoint.new(0.55, 1), NumberSequenceKeypoint.new(1, 1) }),
+		Rotation = 25, Offset = Vector2.new(-1, 0), Parent = shine,
+	})
+	task.spawn(function()
+		while shine.Parent do
+			task.wait(interval or 3.5)
+			local t0 = os.clock()
+			while os.clock() - t0 < 0.7 and shine.Parent do
+				grad.Offset = Vector2.new(-1 + (os.clock() - t0) / 0.7 * 2, 0)
+				task.wait(0.03)
+			end
+			grad.Offset = Vector2.new(-1, 0)
+		end
+	end)
+	return shine
+end
+
+-- Spinning light rays (the unwrap reveal background)
+function UIKit.Rays(parent, color, count)
+	local holder = UIKit.Create("Frame", { Name = "Rays", Size = UDim2.new(0, 420, 0, 420), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, ZIndex = parent.ZIndex or 1, Parent = parent })
+	local n = count or 12
+	for i = 1, n do
+		local ray = UIKit.Create("Frame", { Size = UDim2.new(0, 46, 1, 0), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = color or Theme.Colors.Yellow, BackgroundTransparency = 0.55, Rotation = (i - 1) * (180 / n), ZIndex = holder.ZIndex, Parent = holder })
+		UIKit.Create("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.2), NumberSequenceKeypoint.new(1, 1) }), Rotation = 90, Parent = ray })
+	end
+	task.spawn(function()
+		while holder.Parent do
+			holder.Rotation = (holder.Rotation + 0.6) % 360
+			task.wait(0.03)
+		end
+	end)
+	local api = { Frame = holder }
+	function api.SetColor(c) for _, r in ipairs(holder:GetChildren()) do if r:IsA("Frame") then r.BackgroundColor3 = c end end end
+	return api
+end
+
+-- "+$250" style text that rises and fades
+function UIKit.FloatText(parent, text, color, position)
+	local label = UIKit.Text({ Text = text, Size = UDim2.new(0, 200, 0, 36), Position = position or UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), TextSize = 30, Color = color or Theme.Colors.Cash, StrokeThickness = 2.5, ZIndex = 20, Parent = parent })
+	local scale = UIKit.Create("UIScale", { Scale = 0.6, Parent = label })
+	UIKit.Tween(scale, { Scale = 1.1 }, 0.18)
+	UIKit.Tween(label, { Position = label.Position - UDim2.new(0, 0, 0, 60) }, 1.0, Enum.EasingStyle.Quad)
+	task.delay(0.6, function() UIKit.Tween(label, { TextTransparency = 1 }, 0.4, Enum.EasingStyle.Quad) end)
+	task.delay(1.1, function() label:Destroy() end)
+	return label
+end
+
+-- A thick outline that carries a gradient (gold glow for primary buttons)
+function UIKit.GlowStroke(obj, color, thickness)
+	local stroke = UIKit.Stroke(obj, thickness or 4, color or Theme.Colors.Gold)
+	UIKit.Create("UIGradient", {
+		Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(0.5, color or Theme.Colors.Gold), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)) }),
+		Rotation = 45, Parent = stroke,
+	})
+	return stroke
+end
+
 ---------------------------------------------------------------------------
 -- Text
 ---------------------------------------------------------------------------
@@ -247,12 +313,17 @@ function UIKit.IconButton(props)
 	UIKit.Gradient(button, color, UIKit.Darken(color, 0.72), 90)
 	UIKit.Stroke(button, Theme.Stroke)
 	local scale = UIKit.Create("UIScale", { Scale = 1, Parent = button })
+	-- glossy top highlight
+	local gloss = UIKit.Create("Frame", { Name = "Gloss", Size = UDim2.new(1, -8, 0.42, 0), Position = UDim2.new(0, 4, 0, 4), BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.72, ZIndex = 3, Parent = button })
+	UIKit.Corner(gloss, 14)
+	UIKit.Create("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }), Rotation = 90, Parent = gloss })
 	if props.Image then
 		UIKit.Create("ImageLabel", { Size = UDim2.new(0.74, 0, 0.74, 0), Position = UDim2.new(0.13, 0, 0.13, 0),
-			BackgroundTransparency = 1, Image = props.Image, ScaleType = Enum.ScaleType.Fit, ZIndex = 3, Parent = button })
+			BackgroundTransparency = 1, Image = props.Image, ScaleType = Enum.ScaleType.Fit, ZIndex = 4, Parent = button })
 	else
-		UIKit.Text({ Text = props.Icon or "?", TextSize = size * 0.52, Stroke = false, ZIndex = 3, Parent = button })
+		UIKit.Text({ Text = props.Icon or "?", TextSize = size * 0.6, Stroke = false, ZIndex = 4, Parent = button })
 	end
+	UIKit.Shine(button, 4 + (props.LayoutOrder or 0) * 0.7)
 	if props.Label then
 		UIKit.Text({ Text = props.Label, Size = UDim2.new(1.4, 0, 0, 22), Position = UDim2.new(-0.2, 0, 0, size - 2),
 			TextSize = 18, Scaled = true, MaxTextSize = 18, ZIndex = 4, Parent = holder })
@@ -315,15 +386,17 @@ function UIKit.Panel(props)
 	})
 	UIKit.Corner(body, Theme.Corner + 6)
 	UIKit.Stroke(body, Theme.Stroke + 0.5)
+	UIKit.Gradient(body, Color3.fromRGB(255, 255, 255), Color3.fromRGB(228, 238, 255), 90)
 	-- title (overlapping the top edge like PS99)
 	local titleHolder = UIKit.Create("Frame", {
 		Name = "Title", Size = UDim2.new(0, 520, 0, 70), Position = UDim2.new(0, 18, 0, -38),
 		BackgroundTransparency = 1, ZIndex = 14, Parent = root,
 	})
-	UIKit.Text({
+	local title = UIKit.Text({
 		Text = (props.Icon and (props.Icon .. " ") or "") .. (props.Title or ""), TextSize = 48, Scaled = true, MaxTextSize = 48,
 		XAlign = Enum.TextXAlignment.Left, StrokeThickness = 3, ZIndex = 15, Parent = titleHolder,
 	})
+	UIKit.Create("UIGradient", { Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 225, 150)) }), Rotation = 90, Parent = title })
 	-- close button
 	local close = UIKit.Create("TextButton", {
 		Name = "Close", Size = UDim2.new(0, 64, 0, 64), Position = UDim2.new(1, 10, 0, -18), AnchorPoint = Vector2.new(0.5, 0.5),

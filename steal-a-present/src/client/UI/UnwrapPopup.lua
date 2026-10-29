@@ -26,13 +26,16 @@ local function build(HUD)
 	UIKit.Corner(header, 24)
 	local headerGrad = UIKit.Gradient(header, Theme.Colors.Blue, Theme.Colors.BlueDark, 90)
 	local headerText = UIKit.Text({ Text = "YOU UNWRAPPED", TextSize = 34, StrokeThickness = 3, ZIndex = 23, Parent = header })
+	local rayHolder = UIKit.Create("Frame", { Size = UDim2.new(1, 0, 0, 130), Position = UDim2.new(0, 0, 0, 100), BackgroundTransparency = 1, ClipsDescendants = true, ZIndex = 21, Parent = card })
+	local rays = UIKit.Rays(rayHolder, Theme.Colors.Yellow, 14)
 	local icon = UIKit.Text({ Text = "🎁", Size = UDim2.new(1, 0, 0, 130), Position = UDim2.new(0, 0, 0, 100), TextSize = 110, Stroke = false, ZIndex = 22, Parent = card })
 	local name = UIKit.Text({ Text = "", Size = UDim2.new(1, -30, 0, 50), Position = UDim2.new(0, 15, 0, 235), TextSize = 40, Scaled = true, MaxTextSize = 40, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 22, Parent = card })
 	local rarity = UIKit.Text({ Text = "", Size = UDim2.new(1, 0, 0, 36), Position = UDim2.new(0, 0, 0, 285), TextSize = 28, StrokeThickness = 2.5, ZIndex = 22, Parent = card })
 	local value = UIKit.Text({ Text = "", Size = UDim2.new(1, 0, 0, 36), Position = UDim2.new(0, 0, 0, 322), TextSize = 30, Color = Theme.Colors.Cash, ZIndex = 22, Parent = card })
 	local button = UIKit.Button({ Text = "AWESOME!", Color = Theme.Colors.Green, Size = UDim2.new(0, 240, 0, 64), Position = UDim2.new(0.5, 0, 1, -22), AnchorPoint = Vector2.new(0.5, 1), TextSize = 30, ZIndex = 22, Parent = card })
 	ui = { Dim = dim, Card = card, Stroke = stroke, Scale = scale, Header = header, HeaderGrad = headerGrad, HeaderText = headerText,
-		Icon = icon, Name = name, Rarity = rarity, Value = value, Button = button }
+		Icon = icon, Name = name, Rarity = rarity, Value = value, Button = button, Rays = rays }
+	UIKit.Shine(button, 2.5)
 	button.Activated:Connect(function() UnwrapPopup.Hide() end)
 	dim.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -77,6 +80,7 @@ function UnwrapPopup.Show(item)
 		UIKit.Gradient(ui.Header, r.Color, r.Color2, 90)
 	end
 	ui.Stroke.Color = r.Tier >= 6 and r.Color or Theme.Colors.Outline
+	ui.Rays.SetColor(isCoal and Color3.fromRGB(80, 80, 80) or r.Color)
 	ui.HeaderText.Text = isCoal and "HO HO... NO." or (r.Tier >= 6 and ("✨ " .. r.Name:upper() .. "! ✨") or "YOU UNWRAPPED")
 	ui.Icon.Text = info.Icon or "🎁"
 	ui.Name.Text = (mutation and (mutation.Name .. " ") or "") .. info.Name

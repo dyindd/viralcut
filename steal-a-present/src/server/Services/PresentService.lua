@@ -152,10 +152,44 @@ function PresentService.PlaceModel(plot, player, record)
 	if not ped then return nil end
 	local model = PresentModels.MakeUnwrapped(record)
 	local body = model.PrimaryPart
-	model:PivotTo(ped.CFrame * CFrame.new(0, 0.5 + body.Size.Y / 2, 0))
+	model:PivotTo(ped.CFrame * CFrame.new(0, 0.8 + body.Size.Y / 2, 0))
 	model:SetAttribute("PresentId", record.Id)
 	model:SetAttribute("OwnerUserId", player.UserId)
+	model:SetAttribute("BaseCFrame", model:GetPivot()) -- clients bob/spin the model around this
 	makeBillboard(model, player, record)
+	-- rarity flair: a neon ring for Rare+, a light pillar + sparkles for Legendary+
+	local rarity = Catalog.Rarities[record.Rarity]
+	if rarity and rarity.Tier >= 4 then
+		local ring = Instance.new("Part")
+		ring.Name = "Ring"
+		ring.Shape = Enum.PartType.Cylinder
+		ring.Size = Vector3.new(0.2, 5.2, 5.2)
+		ring.CFrame = ped.CFrame * CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.rad(90))
+		ring.Color = rarity.Color
+		ring.Material = Enum.Material.Neon
+		ring.Anchored = true
+		ring.CanCollide = false
+		ring.CanQuery = false
+		ring.Transparency = 0.25
+		ring.Parent = model
+		if rarity.Tier >= 6 then
+			local pillar = Instance.new("Part")
+			pillar.Name = "Pillar"
+			pillar.Shape = Enum.PartType.Cylinder
+			pillar.Size = Vector3.new(14, 2.6, 2.6)
+			pillar.CFrame = ped.CFrame * CFrame.new(0, 7.5, 0) * CFrame.Angles(0, 0, math.rad(90))
+			pillar.Color = rarity.Color
+			pillar.Material = Enum.Material.Neon
+			pillar.Anchored = true
+			pillar.CanCollide = false
+			pillar.CanQuery = false
+			pillar.Transparency = 0.8
+			pillar.Parent = model
+			local sparkles = Instance.new("Sparkles")
+			sparkles.SparkleColor = rarity.Color
+			sparkles.Parent = body
+		end
+	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "StealPrompt"
 	prompt.ActionText = "Steal!"

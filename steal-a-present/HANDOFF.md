@@ -21,8 +21,9 @@ READ FIRST (in this order)
 4. docs/BALANCING.md, docs/ROADMAP.md, docs/RESEARCH.md, docs/LAUNCH.md as needed
 
 CURRENT STATE
-- ~10,500 lines of Luau, 22 server services, 9 client panels, all data-driven from src/shared/Config.lua
-  and src/shared/Catalog.lua.
+- ~12,000 lines of Luau, 22 server services, 9 client panels, all data-driven from src/shared/Config.lua
+  and src/shared/Catalog.lua. The world is fully procedural (Decor.lua + Environment.lua): decorated
+  trees, snowmen, cottages, aurora, terrain mountains, lighting/post-fx; presents float; training lifts.
 - All checks pass: `python3 tests/run_tests.py` (unit), `python3 tests/run_scenarios.py` (45 end-to-end
   scenarios that boot the REAL server and client in the engine), `python3 tests/econ_sim.py` (pacing).
   They need `pip install lupa`.

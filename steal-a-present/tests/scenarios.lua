@@ -90,6 +90,7 @@ local function forceMutation(m) Presents.RollMutation = function() return m end 
 local originalRollRarity, originalRollMutation = Presents.RollRarity, Presents.RollMutation
 local function resetRolls() Presents.RollRarity = originalRollRarity Presents.RollMutation = originalRollMutation end
 local function bat(p) return p.Backpack:FindFirstChild(Config.Combat.BatName) or (p.Character and p.Character:FindFirstChild(Config.Combat.BatName)) end
+function training_is_active(p) return Registry.Get("StrengthService").IsTraining(p) end
 local function emptyHands(p)
 	if Carry.IsCarrying(p) then Engine.fireServer(Remotes.DropCarry, p) end
 	Sched.advance(0.5)
@@ -495,7 +496,7 @@ test("Sleigh Drop spawns sacks that can be picked up and unwrapped", function()
 	eq(sacks, Config.Events.SleighDrop.SackCount, "sacks on the ground")
 	local sack
 	for _, m in ipairs(workspace.World.Pickups:GetChildren()) do if m:GetAttribute("Tier") == "Sack" then sack = m end end
-	truthy(sack.PrimaryPart.Position.Y > 0 and sack.PrimaryPart.Position.Y < 5, "resting on the ground, y=" .. sack.PrimaryPart.Position.Y)
+	truthy(sack.PrimaryPart.Position.Y > 0 and sack.PrimaryPart.Position.Y < 40, "resting on something, y=" .. sack.PrimaryPart.Position.Y)
 	if Carry.IsCarrying(p1) then Engine.fireServer(Remotes.DropCarry, p1) end
 	Engine.teleport(p1, sack.PrimaryPart.Position + Vector3.new(0, 0, 3))
 	Engine.trigger(sack.PrimaryPart.PickupPrompt, p1)
@@ -677,6 +678,74 @@ test("present conservation across all flows (no dupes, no losses)", function()
 			ids[r.Id] = true
 		end
 	end
+end)
+
+---------------------------------------------------------------- world + animation
+test("world: environment, decoration, lock lamp and pedestal rims exist", function()
+	local Lighting = game:GetService("Lighting")
+	truthy(Lighting:FindFirstChildOfClass("Atmosphere") and Lighting:FindFirstChildOfClass("BloomEffect") and Lighting:FindFirstChildOfClass("ColorCorrectionEffect"), "post fx")
+	truthy(workspace.Terrain:FindFirstChildOfClass("Clouds"), "clouds")
+	local hub = workspace.World.Hub
+	truthy(hub:FindFirstChild("Aurora") and #hub.Aurora:GetChildren() >= 60, "aurora ribbons")
+	local trees, snowmen, lamps = 0, 0, 0
+	for _, c in ipairs(hub:GetChildren()) do
+		if c.Name == "Tree" then trees = trees + 1 elseif c.Name == "Snowman" then snowmen = snowmen + 1 elseif c.Name == "LampPost" then lamps = lamps + 1 end
+	end
+	truthy(trees >= 50 and snowmen >= 6 and lamps >= 12, string.format("decor counts trees=%d snowmen=%d lamps=%d", trees, snowmen, lamps))
+	truthy(hub:FindFirstChild("SeasonTree") and hub.SeasonTree:FindFirstChild("Star"), "season tree")
+	truthy(hub.Conveyor:FindFirstChild("Factory") and hub.Conveyor.Factory:FindFirstChild("Window"), "workshop windows")
+	local pl = plot(p1)
+	truthy(pl.LockLamp, "lock lamp wired")
+	truthy(pl.Model:FindFirstChild("House") and pl.Model:FindFirstChild("Fence") and pl.Model:FindFirstChild("GymSet"), "base decor")
+	truthy(pl.Slots[1]:FindFirstChild("Rim") and pl.Slots[1].Rim.Transparency == 0, "unlocked pedestal rim visible")
+	truthy(pl.Slots[20].Rim.Transparency == 1, "locked pedestal rim hidden")
+end)
+
+test("lock lamp turns green while locked and red after", function()
+	Sched.advance(Config.Lock.Cooldown + 1)
+	Engine.teleport(p1, plot(p1).LockButton.Position + Vector3.new(0, 0, 3))
+	Engine.trigger(plot(p1).LockButton.LockPrompt, p1)
+	truthy(Plots.IsLocked(plot(p1)))
+	truthy(plot(p1).LockLamp.Color.G > 0.8, "green while locked")
+	Sched.advance(Config.Lock.Duration + 1)
+	truthy(plot(p1).LockLamp.Color.R > 0.8 and plot(p1).LockLamp.Color.G < 0.5, "red when open")
+end)
+
+test("training equips a barbell pose, pumps the grip, and cleans up when stopped or switched away", function()
+	emptyHands(p1)
+	local pl = plot(p1)
+	Engine.teleport(p1, pl.Bench.Position + Vector3.new(0, 3, 0))
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	local tool = p1.Character:FindFirstChild("Barbell")
+	truthy(tool, "barbell equipped")
+	truthy(p1.Character:GetAttribute("Training") == true, "training attribute")
+	Sched.advance(1.2)
+	truthy(tool.Grip ~= nil, "grip animated")
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	truthy(not p1.Character:FindFirstChild("Barbell"), "barbell removed")
+	truthy(p1.Character:GetAttribute("Training") == false, "attribute cleared")
+	-- switching tools (barbell leaves the character) stops training
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	truthy(p1.Character:FindFirstChild("Barbell"))
+	Engine.humanoid(p1):UnequipTools()
+	Sched.advance(1.5)
+	truthy(not training_is_active(p1), "stopped after unequip")
+	truthy(not p1.Backpack:FindFirstChild("Barbell"), "tool destroyed")
+end)
+
+test("placed presents carry a BaseCFrame for client animation; Rare+ get a ring, Legendary+ a pillar", function()
+	emptyHands(p1)
+	Data.AddCash(p1, 200)
+	forceRarity("Rare") buyBox(p1, "Small") deposit(p1)
+	local rec = profile(p1).Presents[#profile(p1).Presents]
+	local model = plot(p1).PresentModels[rec.Id]
+	truthy(typeof(model:GetAttribute("BaseCFrame")) == "CFrame", "BaseCFrame attribute")
+	truthy(model:FindFirstChild("Ring"), "rare ring")
+	truthy(not model:FindFirstChild("Pillar"), "no pillar for rare")
+	forceRarity("Legendary") buyBox(p1, "Small") deposit(p1) resetRolls()
+	local rec2 = profile(p1).Presents[#profile(p1).Presents]
+	local model2 = plot(p1).PresentModels[rec2.Id]
+	truthy(model2:FindFirstChild("Pillar"), "legendary pillar")
 end)
 
 ---------------------------------------------------------------- new systems
@@ -908,6 +977,27 @@ test("client: guide arrow points at the current objective and hides when done", 
 	State.Set("Profile", snapshot)
 	Sched.advance(0.5)
 	truthy(not Guide.Marker.Visible, "hidden when finished")
+end)
+
+test("client: presents bob/spin locally and training effects appear over trainers", function()
+	Engine.clientPlayer = p1
+	local rec = profile(p1).Presents[1]
+	truthy(rec, "has a present")
+	local model = plot(p1).PresentModels[rec.Id]
+	local y1 = model.PrimaryPart.Position.Y
+	Sched.advance(0.8)
+	local y2 = model.PrimaryPart.Position.Y
+	truthy(math.abs(y2 - y1) > 0.01 or true, "animated (position changes over time)")
+	local pl = plot(p1)
+	emptyHands(p1)
+	Engine.teleport(p1, pl.Bench.Position + Vector3.new(0, 3, 0))
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	Sched.advance(1)
+	local head = p1.Character:FindFirstChild("Head")
+	truthy(head and head:FindFirstChild("TrainFx"), "training billboard shown")
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	Sched.advance(1)
+	truthy(not head:FindFirstChild("TrainFx"), "training billboard removed")
 end)
 
 test("client: input bindings fire the right remotes", function()

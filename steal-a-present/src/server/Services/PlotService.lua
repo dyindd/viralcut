@@ -44,6 +44,7 @@ local function wrapPlot(model)
 		LockButton = model:FindFirstChild("LockButton"),
 		Bench = model:FindFirstChild("Bench"),
 		Dome = model:FindFirstChild("Dome"),
+		LockLamp = model:FindFirstChild("LockLamp", true),
 		Delivery = model:FindFirstChild("Delivery"),
 		SpawnPoint = model:FindFirstChild("SpawnPoint"),
 		SlotsFolder = model:FindFirstChild("Slots"),
@@ -193,6 +194,9 @@ function PlotService.RefreshSlots(plot)
 		local visible = i <= count
 		ped.Transparency = visible and 0 or 1
 		ped.CanCollide = visible
+		for _, child in ipairs(ped:GetChildren()) do
+			if child:IsA("BasePart") then child.Transparency = visible and 0 or 1 end
+		end
 	end
 end
 
@@ -237,6 +241,13 @@ end
 local function setDome(plot, visible)
 	if plot.Dome then
 		plot.Dome.Transparency = visible and 0.55 or 1
+	end
+	local lamp = plot.LockLamp
+	if lamp then
+		local color = visible and Color3.fromRGB(90, 255, 120) or Color3.fromRGB(255, 80, 80)
+		lamp.Color = color
+		local light = lamp:FindFirstChildOfClass("PointLight")
+		if light then light.Color = color end
 	end
 end
 
