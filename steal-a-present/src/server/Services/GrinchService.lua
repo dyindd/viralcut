@@ -214,6 +214,7 @@ end
 
 function GrinchService.RegisterHit(attacker, grinch, source)
 	if not state.Active or state.Player ~= grinch or attacker == grinch then return end
+	if source ~= "snowball" then return end -- bat swings only knock the Grinch back; snowballs defeat them
 	state.Hits = state.Hits + 1
 	local profile = Data().GetProfile(attacker)
 	if profile then

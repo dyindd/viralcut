@@ -36,8 +36,8 @@ local function returnToOwner(entry, reason)
 	end
 	-- put it back in a free slot (its old one if possible)
 	local used = {}
-	for _, r in ipairs(profile.Presents) do used[r.Slot] = true end
-	local slot = (not used[entry.Record.Slot]) and entry.Record.Slot or Plots().GetFreeSlot(owner)
+	for _, r in ipairs(profile.Presents) do if r.Slot then used[r.Slot] = true end end
+	local slot = (entry.Record.Slot and not used[entry.Record.Slot]) and entry.Record.Slot or Plots().GetFreeSlot(owner)
 	if not slot then
 		-- base somehow full: pay them out instead
 		local value = math.floor(Presents().GetValue(owner, entry.Record, profile) * Config.SellSeconds)
@@ -150,8 +150,8 @@ function StealService.ReclaimAllFrom(owner, profile)
 				Notify().Notify(thief, "The owner left - the present vanished!", "info")
 			end
 			local used = {}
-			for _, r in ipairs(profile.Presents) do used[r.Slot] = true end
-			if used[entry.Record.Slot] then
+			for _, r in ipairs(profile.Presents) do if r.Slot then used[r.Slot] = true end end
+			if not entry.Record.Slot or used[entry.Record.Slot] then
 				entry.Record.Slot = nil
 				for i = 1, Config.Plots.MaxSlots do
 					if not used[i] then entry.Record.Slot = i break end

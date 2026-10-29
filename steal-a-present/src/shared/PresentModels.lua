@@ -20,7 +20,15 @@ local function getCustomModel(folderName, key)
 	local folder = models and models:FindFirstChild(folderName)
 	local model = folder and folder:FindFirstChild(key)
 	if model and model:IsA("Model") and model.PrimaryPart then
-		return model:Clone()
+		local clone = model:Clone()
+		for _, part in ipairs(clone:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Anchored = true
+				part.CanCollide = false
+				part.CanQuery = true
+			end
+		end
+		return clone
 	end
 	return nil
 end

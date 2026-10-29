@@ -112,12 +112,36 @@ end
 ---------------------------------------------------------------------------
 -- Hits
 ---------------------------------------------------------------------------
+-- Characters are simulated by their own client, so setting AssemblyLinearVelocity from the
+-- server can be overwritten. A short-lived LinearVelocity constraint replicates and the owning
+-- client applies it, so the launch always happens.
+function CombatService.Impulse(root, velocity, duration)
+	if not root or not root.Parent then return end
+	local att = root:FindFirstChild("ImpulseAttachment")
+	if not att then
+		att = Instance.new("Attachment")
+		att.Name = "ImpulseAttachment"
+		att.Parent = root
+	end
+	local old = root:FindFirstChild("Impulse")
+	if old then old:Destroy() end
+	local lv = Instance.new("LinearVelocity")
+	lv.Name = "Impulse"
+	lv.Attachment0 = att
+	lv.RelativeTo = Enum.ActuatorRelativeTo.World
+	lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+	lv.VectorVelocity = velocity
+	lv.MaxForce = math.huge
+	lv.Parent = root
+	Debris:AddItem(lv, duration or 0.15)
+end
+
 local function knockback(targetRoot, fromPosition, force)
 	local dir = (targetRoot.Position - fromPosition)
 	dir = Vector3.new(dir.X, 0, dir.Z)
 	if dir.Magnitude < 0.1 then dir = Vector3.new(1, 0, 0) end
 	dir = dir.Unit
-	targetRoot.AssemblyLinearVelocity = dir * force + Vector3.new(0, force * 0.6, 0)
+	CombatService.Impulse(targetRoot, dir * force + Vector3.new(0, force * 0.6, 0), 0.15)
 end
 
 local function stun(target, seconds)

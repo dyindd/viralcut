@@ -173,7 +173,7 @@ function PlotService.GetFreeSlot(player)
 	if not profile then return nil end
 	local used = {}
 	for _, record in ipairs(profile.Presents) do
-		used[record.Slot] = true
+		if record.Slot then used[record.Slot] = true end
 	end
 	for i = 1, PlotService.GetSlotCount(player) do
 		if not used[i] then
@@ -272,8 +272,9 @@ function PlotService.Lock(player)
 	Notify.Notify(player, "Base locked for " .. Util.FormatTime(duration) .. "!", "success")
 	PlotService.SendBaseState(player)
 	PlotService.UpdateSign(plot)
-	task.delay(duration, function()
-		if plot.Owner == player and now() >= plot.LockUntil then
+	local myLock = plot.LockUntil
+	task.delay(duration + 0.25, function()
+		if plot.Owner == player and plot.LockUntil == myLock then
 			setDome(plot, false)
 			PlotService.UpdateSign(plot)
 			if player.Parent then

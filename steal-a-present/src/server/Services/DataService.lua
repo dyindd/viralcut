@@ -374,8 +374,11 @@ function DataService.Start()
 	task.spawn(function()
 		while true do
 			task.wait(Config.AutosaveInterval)
-			for userId, profile in pairs(profiles) do
-				saveProfile(userId, profile, false)
+			local ids = {}
+			for userId in pairs(profiles) do table.insert(ids, userId) end
+			for _, userId in ipairs(ids) do
+				local profile = profiles[userId]
+				if profile then saveProfile(userId, profile, false) end
 				task.wait(0.5) -- stagger to respect DataStore budgets
 			end
 		end

@@ -128,15 +128,20 @@ end
 ---------------------------------------------------------------------------
 -- Floor boxes (dropped / sleigh / rewards)
 ---------------------------------------------------------------------------
-function ConveyorService.SpawnFloorBox(tierKey, position, lifetime, fromHeight)
+function ConveyorService.SpawnFloorBox(tierKey, position, lifetime, fromHeight, ignore)
 	local tier = PresentModels.GetTier(tierKey)
 	local model = PresentModels.MakeBox(tier.Key)
 	local id = Util.NewId("floor")
 	model:SetAttribute("BoxId", id)
-	-- find the ground under the position
+	-- find the ground under the position (ignore belt boxes, pickups, characters)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { beltFolder, pickupFolder }
+	local filter = { beltFolder, pickupFolder }
+	for _, inst in ipairs(ignore or {}) do table.insert(filter, inst) end
+	for _, other in ipairs(game:GetService("Players"):GetPlayers()) do
+		if other.Character then table.insert(filter, other.Character) end
+	end
+	params.FilterDescendantsInstances = filter
 	local ray = Workspace:Raycast(position + Vector3.new(0, 20, 0), Vector3.new(0, -200, 0), params)
 	local groundY = ray and ray.Position.Y or 0
 	local restCF = CFrame.new(position.X, groundY + model.PrimaryPart.Size.Y / 2 + 0.1, position.Z)

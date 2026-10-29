@@ -79,8 +79,8 @@ local function onGift(player, presentId, targetUserId)
 	Data().AddSnowflakes(target, Config.Gift.SnowflakesForBoth)
 	Registry.Get("QuestService").Progress(player, "Gift", 1)
 
-	local info = Catalog.PresentByKey[record.Key]
-	local rarity = Catalog.Rarities[record.Rarity]
+	local info = Catalog.PresentByKey[record.Key] or { Name = record.Key }
+	local rarity = Catalog.Rarities[record.Rarity] or Catalog.Rarities.Common
 	Notify().Notify(player, "You gifted " .. info.Name .. " to " .. target.DisplayName .. "! +" .. Config.Gift.SnowflakesForBoth .. " Snowflakes", "success")
 	Notify().Notify(target, "💝 " .. player.DisplayName .. " gifted you a " .. rarity.Name .. " " .. info.Name .. "!" .. (friends and " (Best Friends bonus!)" or ""), "success")
 	Notify().Effect("Gift", targetPlot.Deposit.Position, { Rarity = record.Rarity })

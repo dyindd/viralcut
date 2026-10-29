@@ -227,6 +227,8 @@ function PresentService.RebuildBase(player)
 			used[record.Slot] = true
 		end
 	end
+	local kept = {}
+	local paidOut = 0
 	for _, record in ipairs(profile.Presents) do
 		if not record.Slot then
 			for i = 1, Config.Plots.MaxSlots do
@@ -239,8 +241,17 @@ function PresentService.RebuildBase(player)
 		end
 		record.Traits = record.Traits or {}
 		if record.Slot then
+			table.insert(kept, record)
 			PresentService.PlaceModel(plot, player, record)
+		else
+			-- more presents than slots can ever hold (bad data): pay the sell value instead of losing it
+			paidOut = paidOut + math.floor(PresentService.GetValue(player, record, profile) * Config.SellSeconds)
 		end
+	end
+	profile.Presents = kept
+	if paidOut > 0 then
+		Data().AddCash(player, paidOut)
+		Notify().Notify(player, "Some presents had no slot and were sold for $" .. Util.FormatNumber(paidOut) .. ".", "info")
 	end
 	PresentService.RecalcIncome(plot)
 
@@ -268,12 +279,12 @@ local function coalPrank(player)
 	local root = Validate.GetRoot(player)
 	if root then
 		local dir = Vector3.new(rng:NextNumber(-1, 1), 0, rng:NextNumber(-1, 1))
-		root.AssemblyLinearVelocity = Vector3.new(dir.X * 35, 55, dir.Z * 35)
+		Registry.Get("CombatService").Impulse(root, Vector3.new(dir.X * 35, 55, dir.Z * 35), 0.15)
 	end
 end
 
 local function announceUnwrap(player, record, plot)
-	local info = Catalog.PresentByKey[record.Key]
+	local info = Catalog.PresentByKey[record.Key] or { Name = record.Key }
 	local rarity = Catalog.Rarities[record.Rarity]
 	local mutationText = record.Mutation and (Catalog.Mutations[record.Mutation].Name .. " ") or ""
 	local pos = plot.Deposit.Position
@@ -353,8 +364,8 @@ local function placeStolen(player, plot, profile, carry)
 	PresentService.PlaceModel(plot, player, record)
 	PresentService.RecalcIncome(plot)
 	Registry.Get("IndexService").Unlock(player, record.Key)
-	local info = Catalog.PresentByKey[record.Key]
-	local rarity = Catalog.Rarities[record.Rarity]
+	local info = Catalog.PresentByKey[record.Key] or { Name = record.Key }
+	local rarity = Catalog.Rarities[record.Rarity] or Catalog.Rarities.Common
 	Notify().Effect("Steal", plot.Deposit.Position, { Rarity = record.Rarity })
 	if carry.Stolen and rarity.Tier >= 6 then
 		local victim = carry.FromUserId and Players:GetPlayerByUserId(carry.FromUserId)
@@ -421,8 +432,14 @@ local function incomeLoop()
 			if profile and plot.IncomePerSec > 0 then
 				local earned = plot.IncomePerSec * Config.IncomeTickSeconds
 				if Data().HasGamepass(owner, "AutoCollect") then
-					Data().AddCash(owner, earned)
-					profile.Stats.CashCollected = (profile.Stats.CashCollected or 0) + earned
+					-- accumulate fractions in the pile, bank only whole cash (AddCash floors)
+					profile.Pile = profile.Pile + earned
+					local whole = math.floor(profile.Pile)
+					if whole >= 1 then
+						profile.Pile = profile.Pile - whole
+						Data().AddCash(owner, whole)
+						profile.Stats.CashCollected = (profile.Stats.CashCollected or 0) + whole
+					end
 				else
 					profile.Pile = profile.Pile + earned
 					Plots().SendBaseState(owner)

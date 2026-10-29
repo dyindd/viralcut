@@ -129,7 +129,7 @@ Config.Strength = {
 Config.Plots = {
 	Count = 8,                   -- number of bases in the ring (>= MaxPlayersPerServer)
 	RingRadius = 150,            -- distance from hub center
-	BaseSize = Vector3.new(44, 1, 36),
+	BaseSize = Vector3.new(44, 1, 48),
 	StartingSlots = 6,
 	MaxSlots = 20,
 	SlotsPerRebirth = 1,

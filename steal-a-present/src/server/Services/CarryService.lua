@@ -184,7 +184,7 @@ function CarryService.Drop(player, reason)
 	if carry.Kind == "Box" then
 		-- a bought box falls to the floor so someone can pick it up
 		if position then
-			Registry.Get("ConveyorService").SpawnFloorBox(carry.Tier, position + Vector3.new(0, 1, 0), 90)
+			Registry.Get("ConveyorService").SpawnFloorBox(carry.Tier, position + Vector3.new(0, 1, 0), 90, nil, { char })
 		end
 	else
 		Registry.Get("StealService").OnDropped(player, carry, reason)
