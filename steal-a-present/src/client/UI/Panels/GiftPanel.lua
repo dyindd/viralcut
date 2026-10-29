@@ -33,7 +33,7 @@ function GiftPanel.Create(HUD)
 		local info = selectedPresent and Catalog.PresentByKey[selectedPresent.Key]
 		status.Text = (p and ("To: " .. p.DisplayName) or "To: (nobody yet)") .. "\n" .. (info and ("Gift: " .. info.Name) or "Gift: (pick a present)")
 		UIKit.SetButtonEnabled(sendBtn, p ~= nil and selectedPresent ~= nil, "Pick both")
-		if p and selectedPresent then sendBtn.Text.Text = "SEND GIFT 💝" end
+		if p and selectedPresent then UIKit.SetButtonText(sendBtn, "SEND GIFT 💝") end
 		for id, b in pairs(playerButtons) do UIKit.SetButtonColor(b, id == selectedPlayer and Theme.Colors.Green or Theme.Colors.Blue) end
 		for id, b in pairs(presentButtons) do UIKit.SetButtonColor(b, (selectedPresent and id == selectedPresent.Id) and Theme.Colors.Green or Theme.Colors.Pink) end
 	end

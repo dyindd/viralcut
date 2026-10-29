@@ -62,9 +62,9 @@ function BasePanel.Create(HUD)
 				OnClick = function()
 					if not armed then
 						armed = true
-						btn.Text.Text = "Confirm?"
+						UIKit.SetButtonText(btn, "Confirm?")
 						UIKit.SetButtonColor(btn, Theme.Colors.Red)
-						task.delay(3, function() if armed and btn.Parent then armed = false btn.Text.Text = "Sell $" .. Util.FormatNumber(sellValue) UIKit.SetButtonColor(btn, Theme.Colors.Orange) end end)
+						task.delay(3, function() if armed and btn.Parent then armed = false UIKit.SetButtonText(btn, "Sell $" .. Util.FormatNumber(sellValue)) UIKit.SetButtonColor(btn, Theme.Colors.Orange) end end)
 					else
 						Remotes.Get("SellPresent"):FireServer(record.Id)
 					end

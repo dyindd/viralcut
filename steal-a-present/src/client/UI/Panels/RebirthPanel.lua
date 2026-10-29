@@ -29,7 +29,7 @@ function RebirthPanel.Create(HUD)
 		big.Text = string.format("x%.1f  ➜  x%.1f income", 1 + n * Config.Rebirth.IncomeBonusPerRebirth, 1 + (n + 1) * Config.Rebirth.IncomeBonusPerRebirth)
 		cost.Text = "Cost: $" .. Util.Commas(price) .. "   (you have $" .. Util.FormatNumber(profile.Cash) .. ")"
 		UIKit.SetButtonEnabled(btn, profile.Cash >= price, "Need $" .. Util.FormatNumber(price))
-		if profile.Cash >= price then btn.Text.Text = "REBIRTH!" end
+		if profile.Cash >= price then UIKit.SetButtonText(btn, "REBIRTH!") end
 	end
 	State.On("Profile", function() if panel.IsOpen then render() end end)
 	panel.Root:GetPropertyChangedSignal("Visible"):Connect(function() if panel.Root.Visible then render() end end)

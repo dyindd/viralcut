@@ -99,7 +99,7 @@ end
 ---------------------------------------------------------------------------
 function UIKit.Text(props)
 	local label = UIKit.Create("TextLabel", {
-		Name = props.Name or "Text",
+		Name = props.Name or "Label",  -- NOT "Text": TextButton.Text is a property and would shadow the child
 		BackgroundTransparency = 1,
 		Size = props.Size or UDim2.new(1, 0, 1, 0),
 		Position = props.Position or UDim2.new(0, 0, 0, 0),
@@ -182,8 +182,14 @@ function UIKit.Button(props)
 	return button, label
 end
 
+-- Change the text of a UIKit.Button (its label child is named "Label")
+function UIKit.SetButtonText(button, text)
+	local label = button:FindFirstChild("Label")
+	if label then label.Text = text end
+end
+
 function UIKit.SetButtonEnabled(button, enabled, disabledText)
-	local label = button:FindFirstChild("Text")
+	local label = button:FindFirstChild("Label")
 	button.Active = enabled
 	button.AutoButtonColor = false
 	local base = button:GetAttribute("BaseColor") or Theme.Colors.Green

@@ -47,7 +47,7 @@ function RewardsPanel.Create(HUD)
 			local ready = p >= Config.PlaytimeGift.IntervalSeconds
 			giftBar.Set(math.min(1, p / Config.PlaytimeGift.IntervalSeconds), ready and "READY!" or Util.FormatTime(Config.PlaytimeGift.IntervalSeconds - p) .. " left")
 			UIKit.SetButtonEnabled(giftBtn, ready, "Not yet")
-			if ready then giftBtn.Text.Text = "CLAIM!" end
+			if ready then UIKit.SetButtonText(giftBtn, "CLAIM!") end
 		end
 		for _, c in ipairs(grid:GetChildren()) do
 			if c:IsA("Frame") then c:Destroy() end
@@ -68,7 +68,7 @@ function RewardsPanel.Create(HUD)
 			end
 		end
 		UIKit.SetButtonEnabled(claimBtn, canClaim == true, "Come back tomorrow!")
-		if canClaim then claimBtn.Text.Text = "CLAIM DAY " .. nextDay .. "!" end
+		if canClaim then UIKit.SetButtonText(claimBtn, "CLAIM DAY " .. nextDay .. "!") end
 	end
 
 	State.On("Profile", function() if panel.IsOpen then render() end end)

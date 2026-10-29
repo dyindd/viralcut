@@ -28,7 +28,7 @@ function SettingsPanel.Create(HUD)
 				toggles[key](value)
 			end })
 		toggles[key] = function(value)
-			btn.Text.Text = value and "ON" or "OFF"
+			UIKit.SetButtonText(btn, value and "ON" or "OFF")
 			UIKit.SetButtonColor(btn, value and Theme.Colors.Green or Theme.Colors.Red)
 		end
 	end

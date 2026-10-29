@@ -27,7 +27,7 @@ function TrapsPanel.Create(HUD)
 			local current = traps[tostring(i)]
 			local def
 			for _, d in ipairs(Config.Traps.List) do if d.Key == current then def = d end end
-			b.Text.Text = "Socket " .. i .. ": " .. (def and def.Name or "Empty")
+			UIKit.SetButtonText(b, "Socket " .. i .. ": " .. (def and def.Name or "Empty"))
 			UIKit.SetButtonColor(b, i == selectedSocket and Theme.Colors.Green or Theme.Colors.Blue)
 		end
 		for _, c in ipairs(grid:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
