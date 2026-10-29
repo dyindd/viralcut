@@ -5,6 +5,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Debris = game:GetService("Debris")
+local Config = require(ReplicatedStorage.Shared.Config)
 local Catalog = require(ReplicatedStorage.Shared.Catalog)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local SoundController = require(script.Parent.SoundController)
@@ -105,6 +106,45 @@ handlers.Rebirth = function(position) burst(position, Color3.fromRGB(190, 110, 2
 handlers.Reward = function() SoundController.Play("Cash", 0.8) end
 handlers.GrinchHit = function() SoundController.Play("Hit", 0.8, 1.2) end
 handlers.SleighDrop = function(position) burst(position + Vector3.new(0, 30, 0), Color3.fromRGB(255, 80, 80), 20, 0.8, 10, 1.5) end
+handlers.Shred = function(position)
+	burst(position, Color3.fromRGB(90, 90, 100), 30, 0.9, 18, 1.2)
+	burst(position, Color3.fromRGB(255, 90, 60), 14, 0.5, 25, 0.6)
+	SoundController.PlayAt("Hit", position, 0.7)
+end
+handlers.Launch = function(position)
+	burst(position, Color3.fromRGB(180, 230, 255), 35, 0.7, 30, 0.8)
+	SoundController.PlayAt("Whoosh", position, 0.9)
+end
+-- Fireworks for Legendary+ unwraps: rockets rise from the pad and burst
+handlers.Fireworks = function(position, extra)
+	local color = extra and extra.Color or Color3.fromRGB(255, 215, 0)
+	for i = 1, 5 do
+		task.delay((i - 1) * 0.35, function()
+			local rocket = Instance.new("Part")
+			rocket.Anchored = true rocket.CanCollide = false rocket.CanQuery = false
+			rocket.Size = Vector3.new(0.6, 1.4, 0.6)
+			rocket.Material = Enum.Material.Neon
+			rocket.Color = color
+			local start = position + Vector3.new(math.random(-6, 6), 1, math.random(-6, 6))
+			rocket.Position = start
+			rocket.Parent = workspace
+			local height = 22 + math.random(0, 10)
+			task.spawn(function()
+				local t0 = os.clock()
+				while os.clock() - t0 < 0.7 do
+					local a = (os.clock() - t0) / 0.7
+					rocket.Position = start + Vector3.new(0, height * a, 0)
+					task.wait()
+				end
+				local top = rocket.Position
+				rocket:Destroy()
+				burst(top, color, 90, 1.3, 42, 1.6)
+				burst(top, Color3.fromRGB(255, 255, 255), 40, 0.8, 30, 1.2)
+				SoundController.PlayAt("Legendary", top, 0.6)
+			end)
+		end)
+	end
+end
 
 -- Presents at bases bob and spin (client-side only; the server owns their real position)
 local function animatePresents()
@@ -131,6 +171,26 @@ local function animatePresents()
 				end
 			end
 		end
+	end
+end
+
+-- Conveyor stripes scroll along the belt (client-side; the parts are anchored decor)
+local stripes
+local function animateBelt(dt)
+	if not stripes then
+		local conv = workspace:FindFirstChild("World") and workspace.World:FindFirstChild("Hub") and workspace.World.Hub:FindFirstChild("Conveyor")
+		if not conv then return end
+		stripes = {}
+		for _, c in ipairs(conv:GetChildren()) do
+			if c.Name == "Stripe" then table.insert(stripes, c) end
+		end
+	end
+	local len = Config.Conveyor.Length
+	local move = Config.Conveyor.Speed * dt
+	for _, s in ipairs(stripes) do
+		local p = s.Position + Vector3.new(move, 0, 0)
+		if p.X > len / 2 then p = p - Vector3.new(len, 0, 0) end
+		s.Position = p
 	end
 end
 
@@ -181,8 +241,9 @@ end
 function EffectsController.Start()
 	task.spawn(function()
 		while true do
-			task.wait(0.05)
+			local dt = task.wait(0.03)
 			pcall(animatePresents)
+			pcall(animateBelt, dt)
 		end
 	end)
 	task.spawn(function()

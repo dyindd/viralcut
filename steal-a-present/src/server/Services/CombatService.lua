@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Debris = game:GetService("Debris")
 
 local Config = require(ReplicatedStorage.Shared.Config)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Registry = require(script.Parent.Parent.Registry)
 local Validate = require(script.Parent.Parent.Validate)
@@ -34,6 +35,7 @@ local function makeBat()
 	tool.RequiresHandle = true
 	tool.CanBeDropped = false
 	tool.ToolTip = "Whack thieves!"
+	tool.TextureId = Icons.Get("Tools", "Bat") or ""
 	tool.Grip = CFrame.new(0, -1.2, 0) * CFrame.Angles(math.rad(90), 0, 0)
 	local handle = Instance.new("Part")
 	handle.Name = "Handle"
@@ -79,6 +81,7 @@ local function makeSnowball()
 	tool.RequiresHandle = true
 	tool.CanBeDropped = false
 	tool.ToolTip = "Throw at the Grinch!"
+	tool.TextureId = Icons.Get("Tools", "Snowball") or ""
 	local handle = Instance.new("Part")
 	handle.Name = "Handle"
 	handle.Shape = Enum.PartType.Ball

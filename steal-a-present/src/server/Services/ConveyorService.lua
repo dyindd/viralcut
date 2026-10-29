@@ -94,21 +94,37 @@ local function spawnBeltBox()
 	if not tier then return end
 	local model = PresentModels.MakeBox(tier.Key)
 	local id = Util.NewId("box")
+	local sale = rng:NextNumber() < (Config.Conveyor.SaleChance or 0)
+	local price = sale and math.floor(tier.Price * (1 - (Config.Conveyor.SaleDiscount or 0.5))) or tier.Price
 	model:SetAttribute("BoxId", id)
-	model:SetAttribute("Price", tier.Price)
+	model:SetAttribute("Price", price)
+	model:SetAttribute("Sale", sale)
+	if sale then
+		for _, p in ipairs(model:GetChildren()) do
+			if p:IsA("BasePart") and p.Name ~= "Body" then p.Color = Color3.fromRGB(255, 215, 0) end
+		end
+		local sparkles = Instance.new("Sparkles")
+		sparkles.SparkleColor = Color3.fromRGB(255, 215, 0)
+		sparkles.Parent = model.PrimaryPart
+		local glow = Instance.new("PointLight")
+		glow.Color = Color3.fromRGB(255, 215, 0)
+		glow.Range = 12
+		glow.Brightness = 1.5
+		glow.Parent = model.PrimaryPart
+	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "BuyPrompt"
-	prompt.ActionText = "Buy  $" .. Util.FormatNumber(tier.Price)
+	prompt.ActionText = (sale and "SALE!  " or "") .. "Buy  $" .. Util.FormatNumber(price)
 	prompt.ObjectText = tier.Name .. (tier.Strength > 0 and ("  (needs " .. Util.FormatNumber(tier.Strength) .. " STR)") or "")
 	prompt.HoldDuration = 0.3
 	prompt.MaxActivationDistance = 9
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = model.PrimaryPart
-	local box = { Id = id, Model = model, Tier = tier.Key, Progress = 0, Price = tier.Price }
+	local box = { Id = id, Model = model, Tier = tier.Key, Progress = 0, Price = price }
 	prompt.Triggered:Connect(function(player)
 		if not RateLimiter.Check(player, "BuyBox") then return end
 		if not beltById[id] then return end
-		if tryTake(player, tier.Key, model, tier.Price) then
+		if tryTake(player, tier.Key, model, box.Price) then
 			removeFromBelt(box)
 		end
 	end)
@@ -124,6 +140,9 @@ local function stepBelt(dt)
 		local box = beltBoxes[i]
 		box.Progress = box.Progress + Config.Conveyor.Speed * dt
 		if box.Progress >= beltLength or not box.Model.Parent then
+			if box.Model.Parent and box.Model.PrimaryPart then
+				Notify().Effect("Shred", box.Model.PrimaryPart.Position, nil)
+			end
 			box.Model:Destroy()
 			removeFromBelt(box)
 		else

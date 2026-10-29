@@ -45,7 +45,9 @@ CONVENTIONS (keep them)
 
 ART
 - assets/images (88 icons), assets/marketing (icon + thumbnails), assets/textures (wrapping paper) are DONE.
-- Upload them with tools/upload_to_roblox.py (Open Cloud API key) or Studio bulk import; ids go in src/shared/Icons.lua.
+- Images only render once uploaded to the owner's Roblox account. Easiest: Studio Asset Manager Bulk Import,
+  Insert the images as Decals, drag them into ReplicatedStorage.Icons (Icons.Get reads that folder by name).
+  Or tools/upload_to_roblox.py (Open Cloud key) / tools/apply_ids.py to bake ids into src/shared/Icons.lua.
 
 NEXT STEPS
 1. Open in Roblox Studio via Rojo (README section 1), press Play, fix anything red in the output.

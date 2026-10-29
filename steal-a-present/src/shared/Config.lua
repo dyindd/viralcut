@@ -61,7 +61,15 @@ Config.Conveyor = {
 	SpawnInterval = 2.2,       -- seconds between boxes
 	MaxOnBelt = 16,
 	BoxGap = 7,                -- minimum studs between boxes
+	SaleChance = 0.12,         -- fraction of boxes that spawn as a glowing SALE box
+	SaleDiscount = 0.5,        -- 50% off
 }
+
+-- Launch pad at every base: owner only, only when not carrying; flings you toward the conveyor
+Config.LaunchPad = { Enabled = true, Speed = 95, Up = 55, Cooldown = 2 }
+
+-- Elf worker NPC wandering each owned base (pure decoration)
+Config.BaseLife = { ElfEnabled = true, ElfSpeed = 7 }
 
 -- Which tiers can spawn and how often (weights, not percents)
 Config.BoxTiers = {

@@ -166,6 +166,9 @@ python3 tests/econ_sim.py
 * The whole world is procedural: `Decor.lua` builds every tree, snowman, lamp post, cottage and candy cane from Parts, `Environment.lua` sets the golden-hour winter lighting, atmosphere, bloom, clouds, generates snowy terrain mountains and a frozen lake, and animates an aurora. Each decoration is one function, so replacing e.g. `Decor.Tree` with a mesh clone changes every tree in the game.
 * Presents at bases float and spin (client-side), Rare+ get a neon ring, Legendary+ a light pillar and sparkles.
 * Training equips a barbell tool so the character actually lifts (the tool pose raises the arm; the grip pumps), with sweat particles and a "💪 TRAINING" tag.
+* Every base has a **launch pad** (owner only, hands empty) that flings you toward the conveyor, an **elf worker** that wanders between your pedestals, a **present pile** that grows with your collection, **repaint** in the Snowflake shop (recolors roof, rims, rug, mailbox, launch pad), fireworks on Legendary+ unwraps.
+* The conveyor has scrolling stripes, glowing gold **SALE boxes** at half price, and sparks when a box hits the shredder.
+* Decoration variety: reindeer team + Santa's sleigh at the workshop, nutcracker and gingerbread statues, giant lollipops, ice crystals, snow rocks, penguins, garlands between lamp posts; the trees now sit between bases, not in front of them.
 * The padlock lamp on every base turns green while locked, red when open.
 * UI: shine sweeps on buttons, spinning light rays behind the unwrap reveal, floating "+$x" pops, a rainbow outline on Rewards while something is claimable, gradient panel bodies and titles.
 
@@ -173,7 +176,11 @@ python3 tests/econ_sim.py
 * `assets/images/` — 88 finished icons (512px PNG, transparent): UI buttons, currencies, box tiers, traps, mutation badges, gamepasses, products, all 46 presents.
 * `assets/marketing/` — game icon (two variants) and three 1920x1080 thumbnails for the Creator Dashboard.
 * `assets/textures/` — four seamless wrapping papers that the belt boxes wear once uploaded.
-* Upload everything and fill the ids automatically: `python3 tools/upload_to_roblox.py --user <your id>` (needs an Open Cloud API key, see the file header). Or bulk-import in Studio and paste ids into `src/shared/Icons.lua` by hand. Until an id is set the UI shows the emoji fallback.
+* **Images only render after they are uploaded to YOUR Roblox account** (that's a Roblox rule, not a game one). Three ways, pick one:
+  1. **Studio, no typing** (easiest): View → Asset Manager → Images → *Bulk Import* `assets/images` and `assets/textures`. When the upload finishes, select all the new images in Asset Manager, right-click → *Insert*. They appear as Decals named `ui_Rewards`, `present_TeddyBear`, …. Create a Folder named `Icons` in ReplicatedStorage and drag the Decals into it, then save the place. `Icons.Get` finds them by name at runtime. (Press Play and the UI, tool hotbar and box wrapping all switch to the real art.)
+  2. **Make it permanent in the repo**: with the Decals in `ReplicatedStorage.Icons`, run the one-liner from the header of `tools/apply_ids.py` in Studio's Command Bar, paste the Output into `ids.txt`, run `python3 tools/apply_ids.py ids.txt`. Now the ids live in `src/shared/Icons.lua`.
+  3. **Fully automatic from the terminal**: `python3 tools/upload_to_roblox.py --user <your id>` with an Open Cloud API key (steps in the file header).
+  Until an image is available the UI shows the emoji fallback, so you can do this gradually. Tool hotbar pictures reuse existing art (Candy Cane Sword for the bat, Snowflake for the snowball, Strength arm for the barbell).
 * 3D models (presents on pedestals, boxes, traps) are still generated Parts; drop meshes into `ReplicatedStorage.Models.*` to replace them.
 * **Sounds**: `Config.Sounds` has library IDs that may be silent/moderated; replace with your own.
 * **Icons**: UI uses emoji; `UIKit.IconButton` takes an `Image` to swap.

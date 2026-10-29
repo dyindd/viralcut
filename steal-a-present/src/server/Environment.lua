@@ -19,20 +19,21 @@ end
 
 function Environment.ApplyLighting()
 	-- golden-hour winter evening: warm sun low on the horizon, deep blue sky, long shadows
-	Lighting.ClockTime = 16.9
-	Lighting.Brightness = 2.6
-	Lighting.ExposureCompensation = 0.25
-	Lighting.Ambient = Color3.fromRGB(110, 120, 160)
-	Lighting.OutdoorAmbient = Color3.fromRGB(135, 145, 190)
-	Lighting.ColorShift_Top = Color3.fromRGB(255, 205, 160)
-	Lighting.ColorShift_Bottom = Color3.fromRGB(120, 140, 200)
-	Lighting.EnvironmentDiffuseScale = 1
-	Lighting.EnvironmentSpecularScale = 1
+	-- crisp, saturated winter afternoon: clear air, no haze, highlights kept under control
+	Lighting.ClockTime = 15.2
+	Lighting.Brightness = 1.8
+	Lighting.ExposureCompensation = 0
+	Lighting.Ambient = Color3.fromRGB(105, 115, 150)
+	Lighting.OutdoorAmbient = Color3.fromRGB(125, 135, 175)
+	Lighting.ColorShift_Top = Color3.fromRGB(255, 240, 220)
+	Lighting.ColorShift_Bottom = Color3.fromRGB(150, 170, 220)
+	Lighting.EnvironmentDiffuseScale = 0.8
+	Lighting.EnvironmentSpecularScale = 0.8
 	Lighting.GlobalShadows = true
-	Lighting.ShadowSoftness = 0.35
-	Lighting.FogStart = 300
-	Lighting.FogEnd = 1400
-	Lighting.FogColor = Color3.fromRGB(200, 215, 245)
+	Lighting.ShadowSoftness = 0.3
+	Lighting.FogStart = 900
+	Lighting.FogEnd = 3500
+	Lighting.FogColor = Color3.fromRGB(200, 220, 250)
 
 	for _, child in ipairs(Lighting:GetChildren()) do
 		if child:IsA("Atmosphere") or child:IsA("BloomEffect") or child:IsA("ColorCorrectionEffect") or child:IsA("SunRaysEffect") or child:IsA("Sky") then
@@ -40,14 +41,14 @@ function Environment.ApplyLighting()
 		end
 	end
 	fx("Sky", { StarCount = 5000, CelestialBodiesShown = true, SunAngularSize = 14, MoonAngularSize = 12 })
-	fx("Atmosphere", { Density = 0.32, Offset = 0.28, Color = Color3.fromRGB(205, 220, 255), Decay = Color3.fromRGB(140, 160, 220), Glare = 0.45, Haze = 1.7 })
-	fx("BloomEffect", { Intensity = 0.55, Size = 36, Threshold = 0.92 })
-	fx("ColorCorrectionEffect", { Saturation = 0.28, Contrast = 0.12, Brightness = 0.02, TintColor = Color3.fromRGB(255, 248, 238) })
-	fx("SunRaysEffect", { Intensity = 0.14, Spread = 0.7 })
+	fx("Atmosphere", { Density = 0.1, Offset = 0.15, Color = Color3.fromRGB(200, 220, 255), Decay = Color3.fromRGB(120, 150, 220), Glare = 0.08, Haze = 0.15 })
+	fx("BloomEffect", { Intensity = 0.25, Size = 20, Threshold = 1.15 })
+	fx("ColorCorrectionEffect", { Saturation = 0.25, Contrast = 0.1, Brightness = -0.02, TintColor = Color3.fromRGB(255, 252, 248) })
+	fx("SunRaysEffect", { Intensity = 0.05, Spread = 0.5 })
 
 	local terrain = Workspace.Terrain
 	for _, c in ipairs(terrain:GetChildren()) do if c:IsA("Clouds") then c:Destroy() end end
-	fx("Clouds", { Cover = 0.55, Density = 0.3, Color = Color3.fromRGB(255, 230, 235), Enabled = true }, terrain)
+	fx("Clouds", { Cover = 0.4, Density = 0.25, Color = Color3.fromRGB(255, 245, 250), Enabled = true }, terrain)
 end
 
 -- Snowy ground beyond the hub, rolling mountains around the map, a frozen lake

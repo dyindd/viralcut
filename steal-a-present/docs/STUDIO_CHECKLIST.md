@@ -20,7 +20,7 @@ The code builds the whole map at runtime, so the only manual work is settings, I
 13. **Wipe test data before launch** by changing `Config.DataStoreName` (e.g. `SAP_Profiles_v2`). Everyone starts fresh.
 14. **Leaderboards** use OrderedDataStores named in `Config.Leaderboard.Boards`; they need the same API access as saving. To reset them, rename the stores.
 15. **Codes**: the launch codes are in `Config.Codes` (LAUNCH, XMAS2026, GRINCH, TIKTOK, FREEBOX). Change them before you publish if you don't want everyone to have them on day one. Players enter them in Settings.
-16. **Upload the art**: `python3 tools/upload_to_roblox.py --user <your user id>` with an Open Cloud API key (setup steps are in the file header) uploads all 92 images and fills `Icons.lua`. Then upload `assets/marketing/game_icon_text.png` and the three thumbnails on the Creator Dashboard.
+16. **Upload the art (required for the images to show)**: in Studio, View → Asset Manager → Images → Bulk Import the `assets/images` and `assets/textures` folders. Select all the new images → right-click → Insert → drag the Decals into a Folder named `Icons` in ReplicatedStorage → save. Done: the game reads them by name. (Alternatives: `tools/upload_to_roblox.py` with an Open Cloud key, or `tools/apply_ids.py` to bake the ids into `Icons.lua`; see README section 7.) Then upload `assets/marketing/game_icon_text.png` and the three thumbnails on the Creator Dashboard.
 17. **Run the tests before every update**: `python3 tests/run_scenarios.py` boots the real server and client here, no Studio needed (see `docs/TESTING.md`).
 
 ## Optional but recommended

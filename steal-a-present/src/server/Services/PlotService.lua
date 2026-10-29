@@ -15,6 +15,7 @@ local Registry = require(script.Parent.Parent.Registry)
 local Validate = require(script.Parent.Parent.Validate)
 local RateLimiter = require(script.Parent.Parent.RateLimiter)
 local WorldBuilder = require(script.Parent.Parent.WorldBuilder)
+local Decor = require(script.Parent.Parent.Decor)
 
 local PlotService = {}
 
@@ -45,6 +46,10 @@ local function wrapPlot(model)
 		Bench = model:FindFirstChild("Bench"),
 		Dome = model:FindFirstChild("Dome"),
 		LockLamp = model:FindFirstChild("LockLamp", true),
+		LaunchPad = model:FindFirstChild("LaunchPad", true),
+		PileAnchor = model:FindFirstChild("PileAnchor"),
+		PileModel = nil,
+		Color = nil,
 		Delivery = model:FindFirstChild("Delivery"),
 		SpawnPoint = model:FindFirstChild("SpawnPoint"),
 		SlotsFolder = model:FindFirstChild("Slots"),
@@ -107,6 +112,20 @@ local function wirePlot(plot)
 		if debounced(player, "collect", 0.5) then return end
 		Registry.Get("PresentService").Collect(player, plot)
 	end)
+	if plot.LaunchPad then
+		plot.LaunchPad.Touched:Connect(function(hit)
+			local player = playerFromHit(hit)
+			if not player or plot.Owner ~= player or not Config.LaunchPad.Enabled then return end
+			if Registry.Get("CarryService").IsCarrying(player) then return end
+			if debounced(player, "launch", Config.LaunchPad.Cooldown) then return end
+			local root = Validate.GetRoot(player)
+			if not root then return end
+			local flat = Vector3.new(-root.Position.X, 0, -root.Position.Z)
+			if flat.Magnitude < 1 then return end
+			Registry.Get("CombatService").Impulse(root, flat.Unit * Config.LaunchPad.Speed + Vector3.new(0, Config.LaunchPad.Up, 0), 0.25)
+			Registry.Get("NotifyService").Effect("Launch", root.Position, nil)
+		end)
+	end
 	local lockPrompt = plot.LockButton:FindFirstChild("LockPrompt")
 	if lockPrompt then
 		lockPrompt.Triggered:Connect(function(player)
@@ -298,6 +317,54 @@ function PlotService.Lock(player)
 	return true
 end
 
+---------------------------------------------------------------------------
+-- Colors + the growing present pile
+---------------------------------------------------------------------------
+function PlotService.DefaultColor(plot)
+	local palette = WorldBuilder.Palette
+	return palette[((plot.Index - 1) % #palette) + 1]
+end
+
+function PlotService.ColorFor(player, plot)
+	local profile = Data().GetProfile(player)
+	local palette = WorldBuilder.Palette
+	if profile and (profile.BaseColor or 0) > 0 and palette[profile.BaseColor] then
+		return palette[profile.BaseColor]
+	end
+	return PlotService.DefaultColor(plot)
+end
+
+function PlotService.ApplyColor(plot, color)
+	plot.Color = color
+	for _, part in ipairs(plot.Model:GetDescendants()) do
+		if part:IsA("BasePart") and part:GetAttribute("Colorable") then
+			part.Color = color
+		end
+	end
+end
+
+-- Snowflake shop: cycle to the next palette color
+function PlotService.Repaint(player)
+	local plot = byUser[player.UserId]
+	local profile = Data().GetProfile(player)
+	if not plot or not profile then return false end
+	profile.BaseColor = ((profile.BaseColor or 0) % #WorldBuilder.Palette) + 1
+	PlotService.ApplyColor(plot, PlotService.ColorFor(player, plot))
+	Registry.Get("NotifyService").Effect("Rebirth", plot.Deposit.Position, nil)
+	Data().Replicate(player)
+	return true
+end
+
+function PlotService.UpdatePile(plot, count)
+	if plot.PileModel then
+		plot.PileModel:Destroy()
+		plot.PileModel = nil
+	end
+	if count > 0 and plot.PileAnchor then
+		plot.PileModel = Decor.PresentPile(plot.Model, plot.PileAnchor.CFrame, math.min(count, 8))
+	end
+end
+
 function PlotService.TeleportToPlot(player)
 	local plot = byUser[player.UserId]
 	local root = Validate.GetRoot(player)
@@ -318,6 +385,7 @@ local function assign(player, profile)
 			plot.CooldownUntil = 0
 			plot.Model:SetAttribute("Owner", player.UserId)
 			byUser[player.UserId] = plot
+			PlotService.ApplyColor(plot, PlotService.ColorFor(player, plot))
 			PlotService.RefreshSlots(plot)
 			Registry.Get("PresentService").RebuildBase(player)
 			Registry.Get("TrapService").RebuildTraps(player)
@@ -344,6 +412,8 @@ local function release(player, profile)
 	plot.IncomePerSec = 0
 	plot.Model:SetAttribute("Owner", 0)
 	setDome(plot, false)
+	PlotService.UpdatePile(plot, 0)
+	PlotService.ApplyColor(plot, PlotService.DefaultColor(plot))
 	PlotService.RefreshSlots(plot)
 	PlotService.UpdateSign(plot)
 	byUser[player.UserId] = nil

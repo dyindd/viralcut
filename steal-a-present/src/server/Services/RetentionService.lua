@@ -136,6 +136,8 @@ local function onBuySnowflakeItem(player, shopKey)
 		grantReward(player, profile, { Type = "Luck", Minutes = give.Luck })
 	elseif give.Slot then
 		grantReward(player, profile, { Type = "Slot", Amount = give.Slot })
+	elseif give.Paint then
+		Registry.Get("PlotService").Repaint(player)
 	end
 	Notify().Notify(player, "Bought " .. item.Name .. "!", "success")
 	Data().Replicate(player)

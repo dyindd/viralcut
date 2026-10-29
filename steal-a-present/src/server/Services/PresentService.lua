@@ -228,6 +228,7 @@ function PresentService.RecalcIncome(plot)
 	plot.IncomePerSec = total
 	Plots().UpdateSign(plot)
 	Plots().SendBaseState(owner)
+	Plots().UpdatePile(plot, #profile.Presents)
 end
 
 -- Recompute every base's income (events start/end, global multipliers)
@@ -331,6 +332,9 @@ local function announceUnwrap(player, record, plot)
 	local mutationText = record.Mutation and (Catalog.Mutations[record.Mutation].Name .. " ") or ""
 	local pos = plot.Deposit.Position
 	Notify().Effect("Unwrap", pos, { Rarity = record.Rarity, Mutation = record.Mutation })
+	if rarity.Tier >= 6 then
+		Notify().Effect("Fireworks", pos, { Color = rarity.Color })
+	end
 	if rarity.Announce == "server" then
 		Notify().Announce(string.format("%s unwrapped a %s%s %s!", player.DisplayName, mutationText, rarity.Name, info.Name), rarity.Color, "rare")
 	elseif record.Mutation and Catalog.Mutations[record.Mutation].Multiplier >= 6 then

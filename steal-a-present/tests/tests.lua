@@ -172,6 +172,11 @@ test("codes, tutorial, leaderboard and new events are well formed", function()
 	for _, e in ipairs(Config.Events.List) do keys[e.Key] = true end
 	assert(keys.DoubleCash and keys.MutationMadness and keys.SleighDrop)
 	assert(Config.AntiCheat.MaxTravelSpeed > Config.Carry.BaseWalkSpeed * 2, "anti-cheat speed must leave headroom over sprint/knockback")
+	assert(Config.LaunchPad.Speed and Config.LaunchPad.Up and Config.LaunchPad.Cooldown, "launch pad config")
+	assert(Config.Conveyor.SaleChance >= 0 and Config.Conveyor.SaleChance <= 1 and Config.Conveyor.SaleDiscount > 0 and Config.Conveyor.SaleDiscount < 1, "sale config")
+	local paint = false
+	for _, it in ipairs(Catalog.SnowflakeShop) do if it.Give.Paint then paint = true end end
+	assert(paint, "repaint shop item")
 	-- every seasonal set referenced by a season has at least one present
 	for _, season in ipairs(Catalog.Seasons) do
 		local n = 0

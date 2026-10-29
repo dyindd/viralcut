@@ -192,6 +192,7 @@ Catalog.SnowflakeShop = {
 	{ Key = "SF_Sack",   Name = "Santa's Sack",     Cost = 300, Give = { Box = "Sack" } },
 	{ Key = "SF_Luck",   Name = "Luck Potion (30m)",Cost = 40,  Give = { Luck = 30 } },
 	{ Key = "SF_Slot",   Name = "+1 Base Slot",     Cost = 250, Give = { Slot = 1 } },
+	{ Key = "SF_Paint",  Name = "Repaint Base",     Cost = 40,  Give = { Paint = true } },
 }
 
 return Catalog

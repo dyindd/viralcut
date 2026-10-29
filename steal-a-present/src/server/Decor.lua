@@ -214,8 +214,9 @@ function Decor.GingerbreadHouse(parent, cf, w, d, h, roofColor, opts)
 	-- roof: two wedges meeting at the ridge
 	local roofH = h * 0.55
 	for _, side in ipairs({ -1, 1 }) do
-		part({ Name = "Roof", Shape = "Wedge", Size = Vector3.new(w + 1.5, roofH, d / 2 + 0.75), CFrame = cf * CFrame.new(0, h + roofH / 2, side * (d / 4 + 0.35)) * CFrame.Angles(0, side > 0 and 0 or math.rad(180), 0),
+		local roof = part({ Name = "Roof", Shape = "Wedge", Size = Vector3.new(w + 1.5, roofH, d / 2 + 0.75), CFrame = cf * CFrame.new(0, h + roofH / 2, side * (d / 4 + 0.35)) * CFrame.Angles(0, side > 0 and 0 or math.rad(180), 0),
 			Color = roofColor or Decor.Colors.Red, Material = Enum.Material.SmoothPlastic, Parent = m })
+		if opts.Colorable then roof:SetAttribute("Colorable", true) end
 		-- icing trim + snow on the roof edge
 		part({ Name = "Icing", Size = Vector3.new(w + 1.8, 0.5, 0.9), CFrame = cf * CFrame.new(0, h + 0.2, side * (d / 2 + 0.6)), Color = Decor.Colors.Icing, CanCollide = false, Parent = m })
 	end
@@ -335,8 +336,8 @@ function Decor.Mailbox(parent, cf, color)
 	local m = model("Mailbox", parent)
 	local post = part({ Name = "Post", Size = Vector3.new(0.5, 3, 0.5), CFrame = cf * CFrame.new(0, 1.5, 0), Color = Decor.Colors.Wood, Material = Enum.Material.Wood, Parent = m })
 	m.PrimaryPart = post
-	part({ Name = "Box", Size = Vector3.new(2.2, 1.6, 1.4), CFrame = cf * CFrame.new(0, 3.6, 0), Color = color or Decor.Colors.Red, Parent = m })
-	part({ Name = "BoxTop", Shape = "Cylinder", Size = Vector3.new(2.2, 1.4, 1.4), CFrame = cf * CFrame.new(0, 4.4, 0), Color = color or Decor.Colors.Red, CanCollide = false, Parent = m })
+	part({ Name = "Box", Size = Vector3.new(2.2, 1.6, 1.4), CFrame = cf * CFrame.new(0, 3.6, 0), Color = color or Decor.Colors.Red, Parent = m }):SetAttribute("Colorable", true)
+	part({ Name = "BoxTop", Shape = "Cylinder", Size = Vector3.new(2.2, 1.4, 1.4), CFrame = cf * CFrame.new(0, 4.4, 0), Color = color or Decor.Colors.Red, CanCollide = false, Parent = m }):SetAttribute("Colorable", true)
 	part({ Name = "Flag", Size = Vector3.new(0.15, 1.2, 0.6), CFrame = cf * CFrame.new(1.2, 4.2, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Neon, CanCollide = false, Parent = m })
 	return m
 end
@@ -397,10 +398,261 @@ function Decor.Barbell()
 		weld.Parent = plate
 	end
 	tool.Grip = CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.rad(90))
+	local Icons = require(game:GetService("ReplicatedStorage").Shared.Icons)
+	tool.TextureId = Icons.Get("Tools", "Barbell") or ""
 	return tool
 end
 Decor.GripDown = CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.rad(90))
 Decor.GripUp = CFrame.new(0, -2.6, -0.4) * CFrame.Angles(0, 0, math.rad(90))
+
+---------------------------------------------------------------------------
+-- Reindeer (brown body, antlers, red nose, bells)
+---------------------------------------------------------------------------
+function Decor.Reindeer(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Reindeer", parent)
+	local body = part({ Name = "Body", Size = Vector3.new(2.6 * s, 2.4 * s, 4.6 * s), CFrame = cf * CFrame.new(0, 3.3 * s, 0), Color = Decor.Colors.Brown, Material = Enum.Material.Fabric, Parent = m })
+	m.PrimaryPart = body
+	for _, x in ipairs({ -0.9, 0.9 }) do
+		for _, z in ipairs({ -1.6, 1.6 }) do
+			part({ Name = "Leg", Size = Vector3.new(0.6 * s, 2.2 * s, 0.6 * s), CFrame = cf * CFrame.new(x * s, 1.1 * s, z * s), Color = Decor.Colors.Brown, Material = Enum.Material.Fabric, Parent = m })
+			part({ Name = "Hoof", Size = Vector3.new(0.65 * s, 0.35 * s, 0.65 * s), CFrame = cf * CFrame.new(x * s, 0.18 * s, z * s), Color = Color3.fromRGB(45, 35, 30), CanCollide = false, Parent = m })
+		end
+	end
+	part({ Name = "Neck", Size = Vector3.new(1.2 * s, 2 * s, 1.2 * s), CFrame = cf * CFrame.new(0, 4.9 * s, -2.1 * s) * CFrame.Angles(math.rad(-25), 0, 0), Color = Decor.Colors.Brown, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	local head = part({ Name = "Head", Size = Vector3.new(1.4 * s, 1.3 * s, 2 * s), CFrame = cf * CFrame.new(0, 5.9 * s, -3 * s), Color = Decor.Colors.Brown, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	local nose = part({ Name = "Nose", Shape = "Ball", Size = Vector3.new(0.6 * s, 0.6 * s, 0.6 * s), CFrame = cf * CFrame.new(0, 5.8 * s, -4.1 * s), Color = Decor.Colors.Red, Material = Enum.Material.Neon, CanCollide = false, Parent = m })
+	light(nose, Decor.Colors.Red, 8 * s, 1)
+	for _, x in ipairs({ -0.4, 0.4 }) do
+		part({ Name = "Eye", Shape = "Ball", Size = Vector3.new(0.3 * s, 0.3 * s, 0.3 * s), CFrame = cf * CFrame.new(x * s, 6.2 * s, -3.9 * s), Color = Color3.fromRGB(20, 20, 20), CanCollide = false, Parent = m })
+		part({ Name = "Ear", Size = Vector3.new(0.35 * s, 0.7 * s, 0.25 * s), CFrame = cf * CFrame.new(x * 1.6 * s, 6.5 * s, -2.6 * s) * CFrame.Angles(0, 0, math.rad(-x * 40)), Color = Decor.Colors.Brown, CanCollide = false, Parent = m })
+		-- antlers: a trunk and two branches each side
+		part({ Name = "Antler", Shape = "Cylinder", Size = Vector3.new(2.2 * s, 0.25 * s, 0.25 * s), CFrame = cf * CFrame.new(x * 1.1 * s, 7.4 * s, -2.7 * s) * CFrame.Angles(0, 0, math.rad(90 - x * 25)), Color = Color3.fromRGB(230, 215, 185), CanCollide = false, Parent = m })
+		part({ Name = "Antler", Shape = "Cylinder", Size = Vector3.new(1.2 * s, 0.2 * s, 0.2 * s), CFrame = cf * CFrame.new(x * 1.6 * s, 8.1 * s, -2.9 * s) * CFrame.Angles(0, 0, math.rad(90 - x * 70)), Color = Color3.fromRGB(230, 215, 185), CanCollide = false, Parent = m })
+		part({ Name = "Antler", Shape = "Cylinder", Size = Vector3.new(1 * s, 0.2 * s, 0.2 * s), CFrame = cf * CFrame.new(x * 1.3 * s, 8.3 * s, -2.3 * s) * CFrame.Angles(math.rad(-40), 0, math.rad(90 + x * 20)), Color = Color3.fromRGB(230, 215, 185), CanCollide = false, Parent = m })
+	end
+	part({ Name = "Harness", Size = Vector3.new(2.8 * s, 0.5 * s, 0.4 * s), CFrame = cf * CFrame.new(0, 3.6 * s, -1.2 * s), Color = Decor.Colors.Red, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	for i = -1, 1 do
+		part({ Name = "Bell", Shape = "Ball", Size = Vector3.new(0.4 * s, 0.4 * s, 0.4 * s), CFrame = cf * CFrame.new(i * 0.8 * s, 3.1 * s, -1.45 * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, Reflectance = 0.4, CanCollide = false, Parent = m })
+	end
+	part({ Name = "Tail", Shape = "Ball", Size = Vector3.new(0.7 * s, 0.7 * s, 0.7 * s), CFrame = cf * CFrame.new(0, 3.9 * s, 2.5 * s), Color = Decor.Colors.Icing, CanCollide = false, Parent = m })
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Santa's sleigh (red body, curved runners, gold trim, presents inside)
+---------------------------------------------------------------------------
+function Decor.Sleigh(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Sleigh", parent)
+	local body = part({ Name = "Body", Size = Vector3.new(4.5 * s, 2.6 * s, 7 * s), CFrame = cf * CFrame.new(0, 2.6 * s, 0), Color = Decor.Colors.Red, Material = Enum.Material.SmoothPlastic, Parent = m })
+	m.PrimaryPart = body
+	part({ Name = "Back", Size = Vector3.new(4.5 * s, 2.2 * s, 0.6 * s), CFrame = cf * CFrame.new(0, 5 * s, 3.2 * s), Color = Decor.Colors.Red, Parent = m })
+	part({ Name = "Front", Shape = "Wedge", Size = Vector3.new(4.5 * s, 2.4 * s, 2.6 * s), CFrame = cf * CFrame.new(0, 2.5 * s, -4.8 * s) * CFrame.Angles(0, math.rad(180), 0), Color = Decor.Colors.Red, Parent = m })
+	part({ Name = "Curl", Shape = "Ball", Size = Vector3.new(1.6 * s, 1.6 * s, 1.6 * s), CFrame = cf * CFrame.new(0, 4.6 * s, -5.6 * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, Reflectance = 0.3, CanCollide = false, Parent = m })
+	for _, x in ipairs({ -1.9, 1.9 }) do
+		part({ Name = "Runner", Shape = "Cylinder", Size = Vector3.new(9 * s, 0.4 * s, 0.4 * s), CFrame = cf * CFrame.new(x * s, 0.4 * s, -0.5 * s) * CFrame.Angles(0, math.rad(90), 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, Reflectance = 0.4, Parent = m })
+		part({ Name = "RunnerTip", Shape = "Ball", Size = Vector3.new(0.9 * s, 0.9 * s, 0.9 * s), CFrame = cf * CFrame.new(x * s, 1.2 * s, -5.2 * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+		for _, z in ipairs({ -2.5, 2 }) do
+			part({ Name = "Strut", Size = Vector3.new(0.35 * s, 1.4 * s, 0.35 * s), CFrame = cf * CFrame.new(x * s, 1 * s, z * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+		end
+	end
+	part({ Name = "Trim", Size = Vector3.new(4.7 * s, 0.35 * s, 7.2 * s), CFrame = cf * CFrame.new(0, 3.95 * s, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, Reflectance = 0.3, CanCollide = false, Parent = m })
+	part({ Name = "Seat", Size = Vector3.new(3.6 * s, 0.6 * s, 2 * s), CFrame = cf * CFrame.new(0, 4.1 * s, 2 * s), Color = Color3.fromRGB(60, 30, 30), Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	Decor.PresentPile(m, cf * CFrame.new(0, 3.9 * s, -1.2 * s), 4)
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Giant lollipop
+---------------------------------------------------------------------------
+function Decor.Lollipop(parent, cf, height, colorA, colorB)
+	local h = height or 9
+	local m = model("Lollipop", parent)
+	local stick = pillar(m, cf * CFrame.new(0, h / 2, 0), 0.35, h, Decor.Colors.White, Enum.Material.SmoothPlastic, "Stick")
+	m.PrimaryPart = stick
+	local r = h * 0.32
+	part({ Name = "Candy", Shape = "Cylinder", Size = Vector3.new(0.9, r * 2, r * 2), CFrame = cf * CFrame.new(0, h + r * 0.8, 0) * CFrame.Angles(0, math.rad(90), 0), Color = colorA or Decor.Colors.Pink, Material = Enum.Material.SmoothPlastic, CanCollide = false, Parent = m })
+	part({ Name = "Swirl", Shape = "Cylinder", Size = Vector3.new(1.0, r * 1.3, r * 1.3), CFrame = cf * CFrame.new(0, h + r * 0.8, 0) * CFrame.Angles(0, math.rad(90), 0), Color = colorB or Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "Center", Shape = "Cylinder", Size = Vector3.new(1.1, r * 0.6, r * 0.6), CFrame = cf * CFrame.new(0, h + r * 0.8, 0) * CFrame.Angles(0, math.rad(90), 0), Color = colorA or Decor.Colors.Pink, CanCollide = false, Parent = m })
+	part({ Name = "Rim", Shape = "Cylinder", Size = Vector3.new(0.5, r * 2.15, r * 2.15), CFrame = cf * CFrame.new(0, h + r * 0.8, 0) * CFrame.Angles(0, math.rad(90), 0), Color = Decor.Colors.Gold, Material = Enum.Material.Neon, CanCollide = false, Parent = m })
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Gingerbread man statue
+---------------------------------------------------------------------------
+function Decor.GingerbreadMan(parent, cf, scale)
+	local s = scale or 1
+	local m = model("GingerbreadMan", parent)
+	local gb = Decor.Colors.Gingerbread
+	local body = part({ Name = "Body", Size = Vector3.new(2.6 * s, 3 * s, 1 * s), CFrame = cf * CFrame.new(0, 3.6 * s, 0), Color = gb, Parent = m })
+	m.PrimaryPart = body
+	part({ Name = "Head", Shape = "Ball", Size = Vector3.new(2.2 * s, 2.2 * s, 1.1 * s), CFrame = cf * CFrame.new(0, 6 * s, 0), Color = gb, Parent = m })
+	for _, x in ipairs({ -1, 1 }) do
+		part({ Name = "Arm", Size = Vector3.new(1.8 * s, 0.9 * s, 0.9 * s), CFrame = cf * CFrame.new(x * 2 * s, 4.4 * s, 0) * CFrame.Angles(0, 0, math.rad(x * 25)), Color = gb, CanCollide = false, Parent = m })
+		part({ Name = "Leg", Size = Vector3.new(0.95 * s, 2.3 * s, 0.95 * s), CFrame = cf * CFrame.new(x * 0.75 * s, 1.15 * s, 0) * CFrame.Angles(0, 0, math.rad(x * 10)), Color = gb, Parent = m })
+		part({ Name = "Cuff", Size = Vector3.new(0.9 * s, 0.35 * s, 1.0 * s), CFrame = cf * CFrame.new(x * 2.7 * s, 4.75 * s, 0) * CFrame.Angles(0, 0, math.rad(x * 25)), Color = Decor.Colors.Icing, CanCollide = false, Parent = m })
+		part({ Name = "Boot", Size = Vector3.new(1.0 * s, 0.35 * s, 1.05 * s), CFrame = cf * CFrame.new(x * 0.9 * s, 0.2 * s, 0), Color = Decor.Colors.Icing, CanCollide = false, Parent = m })
+		part({ Name = "Eye", Shape = "Ball", Size = Vector3.new(0.3 * s, 0.3 * s, 0.3 * s), CFrame = cf * CFrame.new(x * 0.4 * s, 6.2 * s, -0.55 * s), Color = Color3.fromRGB(20, 20, 20), CanCollide = false, Parent = m })
+	end
+	part({ Name = "Smile", Size = Vector3.new(0.9 * s, 0.2 * s, 0.2 * s), CFrame = cf * CFrame.new(0, 5.5 * s, -0.56 * s), Color = Decor.Colors.Icing, CanCollide = false, Parent = m })
+	for i = 1, 3 do
+		part({ Name = "Gumdrop", Shape = "Ball", Size = Vector3.new(0.45 * s, 0.45 * s, 0.45 * s), CFrame = cf * CFrame.new(0, (2.7 + i * 0.6) * s, -0.55 * s), Color = ORNAMENTS[i], Material = Enum.Material.Neon, CanCollide = false, Parent = m })
+	end
+	part({ Name = "Bow", Size = Vector3.new(1.2 * s, 0.5 * s, 0.4 * s), CFrame = cf * CFrame.new(0, 4.95 * s, -0.55 * s), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Nutcracker soldier statue
+---------------------------------------------------------------------------
+function Decor.Nutcracker(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Nutcracker", parent)
+	local coat = part({ Name = "Coat", Size = Vector3.new(2.4 * s, 3 * s, 1.6 * s), CFrame = cf * CFrame.new(0, 4.3 * s, 0), Color = Decor.Colors.Red, Parent = m })
+	m.PrimaryPart = coat
+	for _, x in ipairs({ -0.6, 0.6 }) do
+		part({ Name = "Leg", Size = Vector3.new(1 * s, 2.4 * s, 1 * s), CFrame = cf * CFrame.new(x * s, 1.9 * s, 0), Color = Color3.fromRGB(40, 60, 140), Parent = m })
+		part({ Name = "Boot", Size = Vector3.new(1.05 * s, 0.8 * s, 1.4 * s), CFrame = cf * CFrame.new(x * s, 0.4 * s, -0.15 * s), Color = Color3.fromRGB(25, 25, 30), Parent = m })
+		part({ Name = "Arm", Size = Vector3.new(0.8 * s, 2.6 * s, 0.8 * s), CFrame = cf * CFrame.new(x * 2.7 * s, 4.3 * s, 0), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+		part({ Name = "Glove", Size = Vector3.new(0.85 * s, 0.7 * s, 0.85 * s), CFrame = cf * CFrame.new(x * 2.7 * s, 2.7 * s, 0), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+		part({ Name = "Epaulet", Size = Vector3.new(1 * s, 0.4 * s, 1 * s), CFrame = cf * CFrame.new(x * 2.5 * s, 5.9 * s, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	end
+	for i = 1, 3 do
+		part({ Name = "Button", Shape = "Ball", Size = Vector3.new(0.35 * s, 0.35 * s, 0.35 * s), CFrame = cf * CFrame.new(0, (3.3 + i * 0.6) * s, -0.85 * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	end
+	part({ Name = "Belt", Size = Vector3.new(2.5 * s, 0.4 * s, 1.7 * s), CFrame = cf * CFrame.new(0, 3.1 * s, 0), Color = Color3.fromRGB(25, 25, 30), CanCollide = false, Parent = m })
+	part({ Name = "Head", Size = Vector3.new(1.8 * s, 1.8 * s, 1.6 * s), CFrame = cf * CFrame.new(0, 6.7 * s, 0), Color = Color3.fromRGB(255, 220, 190), Parent = m })
+	part({ Name = "Beard", Size = Vector3.new(1.6 * s, 0.9 * s, 0.5 * s), CFrame = cf * CFrame.new(0, 6.0 * s, -0.75 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "Moustache", Size = Vector3.new(1.2 * s, 0.3 * s, 0.3 * s), CFrame = cf * CFrame.new(0, 6.6 * s, -0.85 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	for _, x in ipairs({ -0.4, 0.4 }) do
+		part({ Name = "Eye", Shape = "Ball", Size = Vector3.new(0.3 * s, 0.3 * s, 0.3 * s), CFrame = cf * CFrame.new(x * s, 7.1 * s, -0.82 * s), Color = Color3.fromRGB(20, 20, 20), CanCollide = false, Parent = m })
+	end
+	part({ Name = "Hat", Size = Vector3.new(1.9 * s, 2.4 * s, 1.7 * s), CFrame = cf * CFrame.new(0, 8.8 * s, 0), Color = Color3.fromRGB(25, 25, 30), Parent = m })
+	part({ Name = "HatBand", Size = Vector3.new(2 * s, 0.4 * s, 1.8 * s), CFrame = cf * CFrame.new(0, 7.8 * s, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	part({ Name = "Plume", Shape = "Ball", Size = Vector3.new(0.8 * s, 1.4 * s, 0.8 * s), CFrame = cf * CFrame.new(0, 10.4 * s, 0), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Ice crystal cluster, snow rock, penguin
+---------------------------------------------------------------------------
+function Decor.IceCrystal(parent, cf, scale)
+	local s = scale or 1
+	local m = model("IceCrystal", parent)
+	local first
+	for i = 1, 5 do
+		local h = (3 + rng:NextNumber(0, 4)) * s
+		local w = (0.8 + rng:NextNumber(0, 0.8)) * s
+		local a = i / 5 * math.pi * 2
+		local p = part({ Name = "Shard", Size = Vector3.new(w, h, w), CFrame = cf * CFrame.new(math.cos(a) * s * 0.9, h / 2, math.sin(a) * s * 0.9) * CFrame.Angles(math.rad(rng:NextNumber(-20, 20)), a, math.rad(rng:NextNumber(-20, 20))),
+			Color = Color3.fromRGB(150, 220, 255), Material = Enum.Material.Glass, Transparency = 0.25, Reflectance = 0.2, CanCollide = false, Parent = m })
+		first = first or p
+	end
+	m.PrimaryPart = first
+	light(first, Color3.fromRGB(150, 220, 255), 12 * s, 0.8)
+	return m
+end
+
+function Decor.SnowRock(parent, cf, scale)
+	local s = scale or 1
+	local m = model("SnowRock", parent)
+	local rock = part({ Name = "Rock", Shape = "Ball", Size = Vector3.new(4 * s, 2.6 * s, 3.4 * s), CFrame = cf * CFrame.new(0, 1 * s, 0), Color = Color3.fromRGB(120, 125, 140), Material = Enum.Material.Slate, Parent = m })
+	m.PrimaryPart = rock
+	part({ Name = "Cap", Shape = "Ball", Size = Vector3.new(3.4 * s, 1.2 * s, 2.9 * s), CFrame = cf * CFrame.new(0, 2 * s, 0), Color = Decor.Colors.Snow, Material = Enum.Material.Snow, CanCollide = false, Parent = m })
+	return m
+end
+
+function Decor.Penguin(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Penguin", parent)
+	local body = part({ Name = "Body", Shape = "Ball", Size = Vector3.new(2 * s, 2.8 * s, 2 * s), CFrame = cf * CFrame.new(0, 1.6 * s, 0), Color = Color3.fromRGB(25, 25, 35), Parent = m })
+	m.PrimaryPart = body
+	part({ Name = "Belly", Shape = "Ball", Size = Vector3.new(1.5 * s, 2.1 * s, 1.2 * s), CFrame = cf * CFrame.new(0, 1.5 * s, -0.5 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "Beak", Shape = "Cylinder", Size = Vector3.new(0.8 * s, 0.35 * s, 0.35 * s), CFrame = cf * CFrame.new(0, 2.4 * s, -1.2 * s) * CFrame.Angles(0, math.rad(90), 0), Color = Color3.fromRGB(255, 150, 40), CanCollide = false, Parent = m })
+	for _, x in ipairs({ -0.35, 0.35 }) do
+		part({ Name = "Eye", Shape = "Ball", Size = Vector3.new(0.25 * s, 0.25 * s, 0.25 * s), CFrame = cf * CFrame.new(x * s, 2.7 * s, -0.9 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+		part({ Name = "Foot", Size = Vector3.new(0.6 * s, 0.2 * s, 0.9 * s), CFrame = cf * CFrame.new(x * 1.2 * s, 0.1 * s, -0.3 * s), Color = Color3.fromRGB(255, 150, 40), CanCollide = false, Parent = m })
+		part({ Name = "Wing", Size = Vector3.new(0.3 * s, 1.6 * s, 0.9 * s), CFrame = cf * CFrame.new(x * 3 * s, 1.6 * s, 0) * CFrame.Angles(0, 0, math.rad(x * 30)), Color = Color3.fromRGB(25, 25, 35), CanCollide = false, Parent = m })
+	end
+	part({ Name = "Scarf", Size = Vector3.new(1.7 * s, 0.4 * s, 1.7 * s), CFrame = cf * CFrame.new(0, 2.3 * s, 0), Color = Decor.Colors.Red, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	part({ Name = "Hat", Shape = "Cylinder", Size = Vector3.new(0.9 * s, 1.1 * s, 1.1 * s), CFrame = cf * CFrame.new(0, 3.4 * s, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+	part({ Name = "Pom", Shape = "Ball", Size = Vector3.new(0.5 * s, 0.5 * s, 0.5 * s), CFrame = cf * CFrame.new(0, 3.95 * s, 0), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Garland of lights sagging between two points (neon bulbs + a thin cord)
+---------------------------------------------------------------------------
+function Decor.Garland(parent, fromPos, toPos)
+	local m = model("Garland", parent)
+	local n = math.max(4, math.floor((toPos - fromPos).Magnitude / 2.4))
+	local first
+	for i = 0, n do
+		local t = i / n
+		local sag = -math.sin(t * math.pi) * 2.2
+		local p = fromPos:Lerp(toPos, t) + Vector3.new(0, sag, 0)
+		if i < n then
+			local q = fromPos:Lerp(toPos, (i + 1) / n) + Vector3.new(0, -math.sin((i + 1) / n * math.pi) * 2.2, 0)
+			local cord = part({ Name = "Cord", Size = Vector3.new(0.12, 0.12, (q - p).Magnitude), CFrame = CFrame.lookAt((p + q) / 2, q), Color = Color3.fromRGB(30, 60, 30), CanCollide = false, CanQuery = false, CastShadow = false, Parent = m })
+			first = first or cord
+		end
+		part({ Name = "Bulb", Shape = "Ball", Size = Vector3.new(0.55, 0.55, 0.55), CFrame = CFrame.new(p), Color = LIGHTS[i % #LIGHTS + 1], Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, CastShadow = false, Parent = m })
+	end
+	m.PrimaryPart = first
+	return m
+end
+
+---------------------------------------------------------------------------
+-- Launch pad (owner-only: flings you toward the conveyor). Returns the pad part named "LaunchPad".
+---------------------------------------------------------------------------
+function Decor.LaunchPad(parent, cf, color)
+	local m = model("LaunchPadModel", parent)
+	local pad = part({ Name = "LaunchPad", Shape = "Cylinder", Size = Vector3.new(0.5, 7, 7), CFrame = cf * CFrame.Angles(0, 0, math.rad(90)), Color = color or Decor.Colors.Blue, Material = Enum.Material.Neon, Parent = m })
+	pad:SetAttribute("Colorable", true)
+	m.PrimaryPart = pad
+	part({ Name = "Ring", Shape = "Cylinder", Size = Vector3.new(0.6, 7.8, 7.8), CFrame = cf * CFrame.new(0, -0.1, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(40, 40, 60), Parent = m })
+	for i = 0, 2 do
+		part({ Name = "Arrow", Shape = "Wedge", Size = Vector3.new(2.2, 0.3, 1.6), CFrame = cf * CFrame.new(0, 0.3, -2 + i * 1.6) * CFrame.Angles(0, math.rad(180), 0), Color = Decor.Colors.White, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = m })
+	end
+	local em = Instance.new("ParticleEmitter")
+	em.Rate = 10
+	em.Lifetime = NumberRange.new(0.8, 1.4)
+	em.Speed = NumberRange.new(6, 10)
+	em.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 0) })
+	em.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+	em.LightEmission = 1
+	em.Parent = pad
+	return pad
+end
+
+---------------------------------------------------------------------------
+-- Elf worker (small NPC that wanders your base carrying a gift)
+---------------------------------------------------------------------------
+function Decor.Elf(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Elf", parent)
+	local torso = part({ Name = "Torso", Size = Vector3.new(1.6 * s, 1.8 * s, 0.9 * s), CFrame = cf * CFrame.new(0, 2.5 * s, 0), Color = Decor.Colors.Green, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	m.PrimaryPart = torso
+	for _, x in ipairs({ -0.45, 0.45 }) do
+		part({ Name = "Leg", Size = Vector3.new(0.6 * s, 1.5 * s, 0.6 * s), CFrame = cf * CFrame.new(x * s, 0.85 * s, 0), Color = Decor.Colors.Red, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+		part({ Name = "Shoe", Size = Vector3.new(0.65 * s, 0.3 * s, 0.9 * s), CFrame = cf * CFrame.new(x * s, 0.15 * s, -0.15 * s), Color = Decor.Colors.Green, CanCollide = false, Parent = m })
+		part({ Name = "Arm", Size = Vector3.new(0.5 * s, 1.5 * s, 0.5 * s), CFrame = cf * CFrame.new(x * 2.2 * s, 2.7 * s, -0.5 * s) * CFrame.Angles(math.rad(-60), 0, 0), Color = Decor.Colors.Green, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	end
+	part({ Name = "Head", Shape = "Ball", Size = Vector3.new(1.3 * s, 1.3 * s, 1.3 * s), CFrame = cf * CFrame.new(0, 4.0 * s, 0), Color = Color3.fromRGB(255, 220, 190), CanCollide = false, Parent = m })
+	for _, x in ipairs({ -0.3, 0.3 }) do
+		part({ Name = "Eye", Shape = "Ball", Size = Vector3.new(0.22 * s, 0.22 * s, 0.22 * s), CFrame = cf * CFrame.new(x * s, 4.15 * s, -0.6 * s), Color = Color3.fromRGB(20, 20, 20), CanCollide = false, Parent = m })
+		part({ Name = "Ear", Size = Vector3.new(0.3 * s, 0.5 * s, 0.25 * s), CFrame = cf * CFrame.new(x * 2.3 * s, 4.1 * s, 0) * CFrame.Angles(0, 0, math.rad(-x * 60)), Color = Color3.fromRGB(255, 220, 190), CanCollide = false, Parent = m })
+	end
+	part({ Name = "Hat", Shape = "Wedge", Size = Vector3.new(1.2 * s, 1.6 * s, 1.2 * s), CFrame = cf * CFrame.new(0, 5.3 * s, 0.1 * s) * CFrame.Angles(0, math.rad(180), 0), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+	part({ Name = "Pom", Shape = "Ball", Size = Vector3.new(0.45 * s, 0.45 * s, 0.45 * s), CFrame = cf * CFrame.new(0, 6.1 * s, -0.3 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "Collar", Size = Vector3.new(1.7 * s, 0.3 * s, 1 * s), CFrame = cf * CFrame.new(0, 3.3 * s, 0), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	-- the gift it carries
+	local gift = part({ Name = "CarriedGift", Size = Vector3.new(1.2 * s, 1.2 * s, 1.2 * s), CFrame = cf * CFrame.new(0, 2.9 * s, -1.4 * s), Color = ORNAMENTS[rng:NextInteger(1, #ORNAMENTS)], CanCollide = false, Parent = m })
+	part({ Name = "GiftRibbon", Size = Vector3.new(0.25 * s, 1.25 * s, 1.25 * s), CFrame = gift.CFrame, Color = Decor.Colors.Gold, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = m })
+	return m
+end
 
 ---------------------------------------------------------------------------
 -- Text on a part face (SurfaceGui helper)
@@ -408,17 +660,26 @@ Decor.GripUp = CFrame.new(0, -2.6, -0.4) * CFrame.Angles(0, 0, math.rad(90))
 function Decor.FaceText(part, text, color, size, face)
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = face or Enum.NormalId.Front
-	gui.CanvasSize = Vector2.new(400, 100)
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 60
+	gui.LightInfluence = 0
+	gui.Brightness = 1.2
 	gui.Parent = part
 	local tl = Instance.new("TextLabel")
 	tl.BackgroundTransparency = 1
-	tl.Size = UDim2.new(1, 0, 1, 0)
-	tl.Font = Enum.Font.FredokaOne
+	tl.Size = UDim2.new(0.92, 0, 0.8, 0)
+	tl.Position = UDim2.new(0.04, 0, 0.1, 0)
+	tl.Font = Enum.Font.LuckiestGuy
 	tl.TextScaled = true
 	tl.Text = text
 	tl.TextColor3 = color or Decor.Colors.White
 	tl.TextStrokeTransparency = 0
+	tl.TextStrokeColor3 = Color3.fromRGB(35, 25, 20)
 	tl.Parent = gui
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 3
+	stroke.Color = Color3.fromRGB(35, 25, 20)
+	stroke.Parent = tl
 	return gui
 end
 

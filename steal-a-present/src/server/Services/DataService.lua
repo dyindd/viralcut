@@ -62,6 +62,7 @@ local function template()
 		Pile = 0,             -- uncollected cash sitting at the base
 		Traps = {},           -- ["1"] = "IcePatch"
 		CodesUsed = {},       -- [code] = unix time
+		BaseColor = 0,        -- 0 = default palette color for the plot; 1..n = chosen color
 		Tutorial = { Completed = {}, Finished = false },
 		LastOnline = 0,
 		FirstJoin = os.time(),

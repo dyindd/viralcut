@@ -26,9 +26,9 @@ local rng = Random.new(7)
 local function label(parent, text, color, offsetY, maxDistance)
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Label"
-	bb.Size = UDim2.new(0, 260, 0, 56)
+	bb.Size = UDim2.new(0, 190, 0, 42)
 	bb.StudsOffset = Vector3.new(0, offsetY or 3, 0)
-	bb.MaxDistance = maxDistance or 150
+	bb.MaxDistance = maxDistance or 110
 	bb.Parent = parent
 	local tl = Instance.new("TextLabel")
 	tl.Name = "Text"
@@ -44,10 +44,13 @@ local function label(parent, text, color, offsetY, maxDistance)
 	return bb
 end
 
+local ORNAMENT_COLORS = { Color3.fromRGB(230, 50, 60), Color3.fromRGB(255, 205, 60), Color3.fromRGB(90, 160, 255), Color3.fromRGB(255, 120, 190), Color3.fromRGB(120, 230, 255) }
 local PALETTE = {
 	Color3.fromRGB(230, 60, 70), Color3.fromRGB(70, 150, 240), Color3.fromRGB(70, 180, 100), Color3.fromRGB(240, 170, 50),
 	Color3.fromRGB(160, 90, 230), Color3.fromRGB(240, 120, 60), Color3.fromRGB(60, 190, 200), Color3.fromRGB(235, 100, 180),
 }
+
+WorldBuilder.Palette = PALETTE
 
 local function prompt(parent, name, action, object, hold, dist)
 	local p = Instance.new("ProximityPrompt")
@@ -113,6 +116,14 @@ local function buildHub(world)
 	end
 	Decor.PresentPile(workshop, CFrame.new(-len / 2 - 4, 0, 12), 5)
 	Decor.PresentPile(workshop, CFrame.new(-len / 2 - 4, 0, -12), 4)
+	-- Santa's sleigh parked beside the workshop with a reindeer team
+	local sleighCF = CFrame.new(-len / 2 - 2, 0, 26) * CFrame.Angles(0, math.rad(90), 0)
+	Decor.Sleigh(hub, sleighCF, 1.1)
+	for i = 1, 3 do
+		Decor.Reindeer(hub, sleighCF * CFrame.new((i % 2 == 0) and 2.2 or -2.2, 0, -8 - i * 5.5), 0.95)
+	end
+	Decor.Nutcracker(hub, CFrame.new(-len / 2 - 2, 0, -24) * CFrame.Angles(0, math.rad(90), 0), 1.2)
+	Decor.Nutcracker(hub, CFrame.new(-len / 2 - 2, 0, -31) * CFrame.Angles(0, math.rad(90), 0), 1.2)
 
 	-- the Grinch's shredder at the end of the belt
 	local shredder = Instance.new("Model")
@@ -182,7 +193,7 @@ local function buildHub(world)
 		for _, px in ipairs({ -7, 7 }) do
 			part({ Name = "BoardPost", Size = Vector3.new(1, 16, 1), CFrame = CFrame.new(x + px, 8, 48), Color = C.Wood, Material = Enum.Material.Wood, Parent = boards })
 		end
-		local board = part({ Name = def.Key .. "Board", Size = Vector3.new(16, 14, 1), CFrame = CFrame.new(x, 9, 48) * CFrame.Angles(0, math.rad(180), 0), Color = Color3.fromRGB(45, 42, 60), Material = Enum.Material.Wood, Parent = boards })
+		local board = part({ Name = def.Key .. "Board", Size = Vector3.new(16, 14, 1), CFrame = CFrame.new(x, 9, 48), Color = Color3.fromRGB(45, 42, 60), Material = Enum.Material.Wood, Parent = boards })
 		part({ Name = "BoardSnow", Size = Vector3.new(17, 0.8, 1.6), CFrame = CFrame.new(x, 16.4, 48), Color = C.Snow, Material = Enum.Material.Snow, CanCollide = false, Parent = boards })
 		local gui = Instance.new("SurfaceGui")
 		gui.Name = "BoardGui"
@@ -226,17 +237,58 @@ local function buildHub(world)
 			Decor.CandyCane(hub, CFrame.new(math.cos(a) * 88, 0, math.sin(a) * 88), 10, 0.6)
 		end
 	end
-	for i = 0, 23 do
-		local a = i / 24 * math.pi * 2 + math.rad(7.5)
-		local r = 118 + (i % 2) * 10
-		Decor.Tree(hub, CFrame.new(math.cos(a) * r, 0, math.sin(a) * r), rng:NextNumber(0.8, 1.3), { Layers = 5 })
+	-- between every pair of bases: a cluster (trees, a statue, a lollipop, crystals, a rock, penguins)
+	local plotCount = Config.Plots.Count
+	for i = 0, plotCount - 1 do
+		local a = (i + 0.5) / plotCount * math.pi * 2 -- angular midpoint between two bases
+		local function at(radius, side, extra)
+			local ang = a + (side or 0) * (18 / radius)
+			return CFrame.new(math.cos(ang) * radius, 0, math.sin(ang) * radius) * CFrame.Angles(0, -ang + math.rad(90) + (extra or 0), 0)
+		end
+		Decor.Tree(hub, at(150, 0), rng:NextNumber(1.1, 1.5), { Layers = 5 })
+		Decor.Tree(hub, at(176, -0.9), rng:NextNumber(0.9, 1.2), { Layers = 5 })
+		Decor.Tree(hub, at(176, 0.9), rng:NextNumber(0.9, 1.2), { Layers = 5 })
+		local kind = i % 4
+		if kind == 0 then
+			Decor.GingerbreadMan(hub, at(130, 0, math.rad(180)), 1.4)
+		elseif kind == 1 then
+			Decor.Nutcracker(hub, at(130, 0, math.rad(180)), 1.3)
+		elseif kind == 2 then
+			Decor.Lollipop(hub, at(130, -0.5), 11, ORNAMENT_COLORS[(i % 5) + 1], C.White)
+			Decor.Lollipop(hub, at(130, 0.5), 9, ORNAMENT_COLORS[((i + 2) % 5) + 1], C.White)
+		else
+			Decor.IceCrystal(hub, at(130, 0), 1.6)
+		end
+		Decor.SnowRock(hub, at(142, (i % 2 == 0) and 1.2 or -1.2), rng:NextNumber(0.9, 1.6))
+		if i % 2 == 0 then
+			Decor.Penguin(hub, at(112, 0.4, math.rad(180)), 0.9)
+			Decor.Penguin(hub, at(114, -0.3, math.rad(150)), 0.75)
+		else
+			Decor.Snowman(hub, at(112, 0, math.rad(180)), rng:NextNumber(0.8, 1.0))
+		end
 	end
+	-- plaza: snowmen, igloos, lollipops around the ice
 	for i = 0, 5 do
 		local a = i / 6 * math.pi * 2 + math.rad(30)
 		Decor.Snowman(hub, CFrame.new(math.cos(a) * 70, 0, math.sin(a) * 70) * CFrame.Angles(0, -a + math.rad(90), 0), rng:NextNumber(0.8, 1.1))
 	end
+	for i = 0, 7 do
+		local a = i / 8 * math.pi * 2 + math.rad(22)
+		Decor.Lollipop(hub, CFrame.new(math.cos(a) * 60, 0, math.sin(a) * 60), 6 + (i % 3) * 1.5, ORNAMENT_COLORS[(i % 5) + 1], C.White)
+	end
 	Decor.Igloo(hub, CFrame.new(-60, 0, 60) * CFrame.Angles(0, math.rad(135), 0), 7)
 	Decor.Igloo(hub, CFrame.new(62, 0, 58) * CFrame.Angles(0, math.rad(-135), 0), 6)
+	Decor.IceCrystal(hub, CFrame.new(-40, 0, 72), 1.3)
+	Decor.IceCrystal(hub, CFrame.new(44, 0, 70), 1.1)
+	for i = 0, 4 do
+		Decor.Penguin(hub, CFrame.new(-14 + i * 7, 0, 60) * CFrame.Angles(0, math.rad(180 + rng:NextNumber(-30, 30)), 0), 0.8)
+	end
+	-- garlands between neighbouring lamp posts
+	for i = 0, 11 do
+		local a1 = i / 12 * math.pi * 2 + math.rad(15)
+		local a2 = (i + 1) / 12 * math.pi * 2 + math.rad(15)
+		Decor.Garland(hub, Vector3.new(math.cos(a1) * 104, 10.6, math.sin(a1) * 104), Vector3.new(math.cos(a2) * 104, 10.6, math.sin(a2) * 104))
+	end
 	-- forest on the foothills around the whole map
 	for i = 0, 35 do
 		local a = i / 36 * math.pi * 2
@@ -269,7 +321,7 @@ local function buildPlot(index, world)
 	local floor = part({ Name = "Floor", Size = size, CFrame = cf * CFrame.new(0, 0.5, 0), Color = C.Snow, Material = Enum.Material.Snow, Parent = plot })
 	plot.PrimaryPart = floor
 	part({ Name = "YardPath", Size = Vector3.new(7, 0.2, size.Z - 2), CFrame = cf * CFrame.new(0, 1.1, 0), Color = Color3.fromRGB(165, 170, 185), Material = Enum.Material.Cobblestone, CanCollide = false, Parent = plot })
-	part({ Name = "Rug", Size = Vector3.new(size.X - 4, 0.15, 10), CFrame = cf * CFrame.new(0, 1.1, 5), Color = color, Material = Enum.Material.Fabric, Transparency = 0.35, CanCollide = false, Parent = plot })
+	part({ Name = "Rug", Size = Vector3.new(size.X - 4, 0.15, 10), CFrame = cf * CFrame.new(0, 1.1, 5), Color = color, Material = Enum.Material.Fabric, Transparency = 0.35, CanCollide = false, Parent = plot }):SetAttribute("Colorable", true)
 
 	-- fences: sides, back, and the front with a gate gap
 	Decor.Fence(plot, cf * CFrame.new(-size.X / 2 - 0.5, 1, 0) * CFrame.Angles(0, math.rad(90), 0), size.Z + 2)
@@ -277,15 +329,15 @@ local function buildPlot(index, world)
 	Decor.Fence(plot, cf * CFrame.new(0, 1, -size.Z / 2 - 0.5), size.X + 2, 14)
 	for _, x in ipairs({ -8, 8 }) do
 		local post = part({ Name = "GatePost", Size = Vector3.new(1.2, 6, 1.2), CFrame = cf * CFrame.new(x, 4, -size.Z / 2 - 0.5), Color = C.White, Parent = plot })
-		part({ Name = "GateCap", Shape = "Ball", Size = Vector3.new(1.6, 1.6, 1.6), CFrame = cf * CFrame.new(x, 7.3, -size.Z / 2 - 0.5), Color = color, Material = Enum.Material.Neon, CanCollide = false, Parent = plot })
+		part({ Name = "GateCap", Shape = "Ball", Size = Vector3.new(1.6, 1.6, 1.6), CFrame = cf * CFrame.new(x, 7.3, -size.Z / 2 - 0.5), Color = color, Material = Enum.Material.Neon, CanCollide = false, Parent = plot }):SetAttribute("Colorable", true)
 		Decor.Wreath(plot, cf * CFrame.new(x, 4.5, -size.Z / 2 - 1.3), 1.1)
 		Decor.LampPost(plot, cf * CFrame.new(x * 1.9, 1, -size.Z / 2 - 4))
 	end
 
 	-- cottage at the back; the owner sign hangs on its front wall
-	Decor.GingerbreadHouse(plot, cf * CFrame.new(0, 1, size.Z / 2 + 7), 26, 12, 12, color, { Name = "House" })
+	Decor.GingerbreadHouse(plot, cf * CFrame.new(0, 1, size.Z / 2 + 7), 26, 12, 12, color, { Name = "House", Colorable = true })
 	local sign = part({ Name = "Sign", Size = Vector3.new(20, 7, 1), CFrame = cf * CFrame.new(0, 10.6, size.Z / 2 + 1), Color = Color3.fromRGB(255, 252, 245), Parent = plot })
-	part({ Name = "SignFrame", Size = Vector3.new(21, 8, 0.8), CFrame = cf * CFrame.new(0, 10.6, size.Z / 2 + 1.2), Color = color, Parent = plot })
+	part({ Name = "SignFrame", Size = Vector3.new(21, 8, 0.8), CFrame = cf * CFrame.new(0, 10.6, size.Z / 2 + 1.2), Color = color, Parent = plot }):SetAttribute("Colorable", true)
 	local gui = Instance.new("SurfaceGui")
 	gui.Name = "SignGui"
 	gui.Face = Enum.NormalId.Front
@@ -326,8 +378,9 @@ local function buildPlot(index, world)
 		Decor.CandyCane(plot, cf * CFrame.new(x, 1, -11), 9, 0.6)
 	end
 	local arch = part({ Name = "Arch", Size = Vector3.new(15, 2.2, 0.8), CFrame = cf * CFrame.new(0, 10.6, -11), Color = C.Wood, Material = Enum.Material.Wood, CanCollide = false, Parent = plot })
-	Decor.FaceText(arch, "🎁 UNWRAP HERE 🎁", C.Gold, nil, Enum.NormalId.Front)
-	Decor.FaceText(arch, "🎁 UNWRAP HERE 🎁", C.Gold, nil, Enum.NormalId.Back)
+	Decor.FaceText(arch, "UNWRAP HERE", C.Gold, nil, Enum.NormalId.Front)
+	Decor.FaceText(arch, "UNWRAP HERE", C.Gold, nil, Enum.NormalId.Back)
+	part({ Name = "ArchTrim", Size = Vector3.new(15.4, 0.5, 1.1), CFrame = cf * CFrame.new(0, 11.9, -11), Color = C.Icing, CanCollide = false, Parent = plot })
 
 	-- collect pad + gold vault
 	local collect = part({ Name = "CollectPad", Size = Vector3.new(6, 0.4, 6), CFrame = cf * CFrame.new(-15, 1.2, -11), Color = C.Gold, Material = Enum.Material.Neon, Parent = plot })
@@ -363,7 +416,7 @@ local function buildPlot(index, world)
 	for i = 1, Config.Traps.Sockets do
 		local off = socketOffsets[i] or Vector3.new(0, 1.05, 0)
 		local s = part({ Name = "Socket" .. i, Size = Vector3.new(0.2, 5, 5), CFrame = cf * CFrame.new(off) * CFrame.Angles(0, 0, math.rad(90)), Color = Color3.fromRGB(205, 215, 235), Material = Enum.Material.Ice, CanCollide = false, Parent = sockets })
-		part({ Name = "SocketRim", Shape = "Cylinder", Size = Vector3.new(0.25, 5.6, 5.6), CFrame = cf * CFrame.new(off - Vector3.new(0, 0.03, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = color, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = s })
+		part({ Name = "SocketRim", Shape = "Cylinder", Size = Vector3.new(0.25, 5.6, 5.6), CFrame = cf * CFrame.new(off - Vector3.new(0, 0.03, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color = color, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = s }):SetAttribute("Colorable", true)
 		s:SetAttribute("SocketIndex", i)
 		s:SetAttribute("Trap", "")
 		prompt(s, "TrapPrompt", "Place Trap", "Empty socket", 0, 8)
@@ -379,7 +432,7 @@ local function buildPlot(index, world)
 		local x = (col - (cfg.SlotsPerRow - 1) / 2) * cfg.SlotSpacing
 		local z = -2 + row * cfg.SlotSpacing
 		local ped = part({ Name = "Slot" .. i, Size = Vector3.new(4.5, 1, 4.5), CFrame = cf * CFrame.new(x, 1.5, z), Color = Color3.fromRGB(225, 228, 240), Material = Enum.Material.Marble, Parent = slots })
-		part({ Name = "Rim", Size = Vector3.new(5, 0.25, 5), CFrame = cf * CFrame.new(x, 1.05, z), Color = color, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = ped })
+		part({ Name = "Rim", Size = Vector3.new(5, 0.25, 5), CFrame = cf * CFrame.new(x, 1.05, z), Color = color, Material = Enum.Material.Neon, CanCollide = false, CanQuery = false, Parent = ped }):SetAttribute("Colorable", true)
 		ped:SetAttribute("SlotIndex", i)
 		ped.Transparency = 1
 		ped.CanCollide = false
@@ -392,7 +445,13 @@ local function buildPlot(index, world)
 	part({ Name = "SpawnPoint", Size = Vector3.new(2, 1, 2), CFrame = cf * CFrame.new(0, 3, -size.Z / 2), Transparency = 1, CanCollide = false, Parent = plot })
 	Decor.Tree(plot, cf * CFrame.new(-19.5, 1, 21.5), 0.62, { Layers = 5 })
 	Decor.Snowman(plot, cf * CFrame.new(19.5, 1, 20) * CFrame.Angles(0, math.rad(180), 0), 0.7)
-	Decor.PresentPile(plot, cf * CFrame.new(20, 1, -18), 3)
+	-- the pile in the corner grows with the presents you own (PlotService.UpdatePile)
+	local pileAnchor = part({ Name = "PileAnchor", Size = Vector3.new(1, 1, 1), CFrame = cf * CFrame.new(20, 1, -18), Transparency = 1, CanCollide = false, CanQuery = false, Parent = plot })
+	-- launch pad just inside the gate: owner only, flings you toward the conveyor when you're not carrying
+	Decor.LaunchPad(plot, cf * CFrame.new(-9, 1.25, -19), color)
+	Decor.Garland(plot, (cf * CFrame.new(-size.X / 2 - 0.5, 4.2, -size.Z / 2 - 0.5)).Position, (cf * CFrame.new(-8, 7.6, -size.Z / 2 - 0.5)).Position)
+	Decor.Garland(plot, (cf * CFrame.new(8, 7.6, -size.Z / 2 - 0.5)).Position, (cf * CFrame.new(size.X / 2 + 0.5, 4.2, -size.Z / 2 - 0.5)).Position)
+	Decor.Penguin(plot, cf * CFrame.new(-19, 1, -14) * CFrame.Angles(0, math.rad(45), 0), 0.7)
 
 	-- shield dome (visual only; the server refuses steals while locked)
 	local dome = part({ Name = "Dome", Size = Vector3.new(size.X + 16, size.X + 16, size.X + 16), CFrame = cf * CFrame.new(0, 0, 2), Color = Color3.fromRGB(120, 200, 255), Material = Enum.Material.ForceField, Transparency = 1, CanCollide = false, Shape = "Ball", Parent = plot })

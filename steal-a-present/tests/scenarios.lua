@@ -748,6 +748,143 @@ test("placed presents carry a BaseCFrame for client animation; Rare+ get a ring,
 	truthy(model2:FindFirstChild("Pillar"), "legendary pillar")
 end)
 
+---------------------------------------------------------------- fun pass
+test("leaderboards face the spawn, hub trees stay clear of base gates, signs use the chunky font", function()
+	local board = workspace.World.Hub.Leaderboards.CashBoard
+	truthy(board.CFrame.LookVector.Z < -0.9, "board front faces the spawn")
+	local plots = workspace.World.Plots:GetChildren()
+	for _, c in ipairs(workspace.World.Hub:GetChildren()) do
+		if c.Name == "Tree" and c.PrimaryPart then
+			for _, pm in ipairs(plots) do
+				local gate = pm:FindFirstChild("SpawnPoint")
+				if gate then
+					local d = (Vector3.new(c.PrimaryPart.Position.X, 0, c.PrimaryPart.Position.Z) - Vector3.new(gate.Position.X, 0, gate.Position.Z)).Magnitude
+					truthy(d > 26, "tree too close to a gate: " .. d)
+				end
+			end
+		end
+	end
+	local arch = plot(p1).Model:FindFirstChild("Arch")
+	local gui = arch:FindFirstChildOfClass("SurfaceGui")
+	local tl = gui:FindFirstChildOfClass("TextLabel")
+	truthy(tl.Font == Enum.Font.LuckiestGuy and not tl.Text:find("🎁"), "sign font/text: " .. tostring(tl.Text))
+	truthy(gui.PixelsPerStud == 60, "sharp sign")
+	local kinds = {}
+	for _, c in ipairs(workspace.World.Hub:GetChildren()) do kinds[c.Name] = (kinds[c.Name] or 0) + 1 end
+	truthy((kinds.Reindeer or 0) >= 3 and (kinds.Sleigh or 0) >= 1 and (kinds.Lollipop or 0) >= 8 and (kinds.Penguin or 0) >= 5 and (kinds.Nutcracker or 0) >= 2 and (kinds.GingerbreadMan or 0) >= 1 and (kinds.IceCrystal or 0) >= 2 and (kinds.Garland or 0) >= 12,
+		"decor variety: " .. tostring(kinds.Reindeer) .. " reindeer, " .. tostring(kinds.Lollipop) .. " lollipops, " .. tostring(kinds.Penguin) .. " penguins, " .. tostring(kinds.Garland) .. " garlands")
+end)
+
+test("launch pad flings the owner (when not carrying), ignores thieves", function()
+	emptyHands(p1) emptyHands(p2)
+	local pl = plot(p1)
+	truthy(pl.LaunchPad, "pad wired")
+	Sched.advance(3)
+	Engine.touch(pl.LaunchPad, p1)
+	truthy(p1.Character.HumanoidRootPart:FindFirstChild("Impulse"), "owner launched")
+	Sched.advance(0.5)
+	truthy(not p1.Character.HumanoidRootPart:FindFirstChild("Impulse"), "impulse cleaned up")
+	Engine.touch(pl.LaunchPad, p2)
+	truthy(not p2.Character.HumanoidRootPart:FindFirstChild("Impulse"), "thief not launched")
+	Data.AddCash(p1, 100)
+	buyBox(p1, "Small")
+	Sched.advance(3)
+	Engine.touch(pl.LaunchPad, p1)
+	truthy(not p1.Character.HumanoidRootPart:FindFirstChild("Impulse"), "no launch while carrying")
+	emptyHands(p1)
+end)
+
+test("repaint base cycles the palette and recolors every Colorable part", function()
+	local WorldBuilder = require(SSS.Server.WorldBuilder)
+	local pl = plot(p1)
+	local rim = pl.Slots[1]:FindFirstChild("Rim")
+	profile(p1).Snowflakes = 500
+	Sched.advance(6)
+	Engine.fireServer(Remotes.BuySnowflakeItem, p1, "SF_Paint")
+	eq(profile(p1).BaseColor, 1)
+	truthy(rim.Color == WorldBuilder.Palette[1], "rim recolored")
+	truthy(pl.Model.House.Roof.Color == WorldBuilder.Palette[1], "roof recolored")
+	Sched.advance(2)
+	Engine.fireServer(Remotes.BuySnowflakeItem, p1, "SF_Paint")
+	eq(profile(p1).BaseColor, 2)
+	truthy(rim.Color == WorldBuilder.Palette[2])
+end)
+
+test("elf worker wanders an owned base; present pile grows with the collection", function()
+	local pl = plot(p1)
+	local elf = pl.Model:FindFirstChild("ElfWorker")
+	truthy(elf, "elf spawned")
+	local p0 = elf.PrimaryPart.Position
+	Sched.advance(4)
+	truthy((elf.PrimaryPart.Position - p0).Magnitude > 0.5, "elf moved")
+	local n = #profile(p1).Presents
+	truthy((n == 0 and pl.PileModel == nil) or (n > 0 and pl.PileModel ~= nil), "pile matches collection")
+	emptyHands(p1)
+	Data.AddCash(p1, 100)
+	forceRarity("Common") buyBox(p1, "Small") deposit(p1) resetRolls()
+	truthy(pl.PileModel ~= nil and #pl.PileModel:GetChildren() >= 3, "pile present after a deposit")
+end)
+
+test("SALE boxes spawn at half price with a gold glow; shredded boxes fire an effect", function()
+	Config.Conveyor.SaleChance = 1
+	local before = {}
+	for _, m in ipairs(beltBoxes()) do before[m] = true end
+	local saleBox
+	local waited = 0
+	while not saleBox and waited < 30 do
+		Sched.advance(1) waited = waited + 1
+		for _, m in ipairs(beltBoxes()) do if not before[m] and m:GetAttribute("Sale") then saleBox = m end end
+	end
+	Config.Conveyor.SaleChance = 0
+	truthy(saleBox, "a sale box spawned")
+	local tier = saleBox:GetAttribute("Tier")
+	local tierPrice
+	for _, t in ipairs(Config.BoxTiers) do if t.Key == tier then tierPrice = t.Price end end
+	eq(saleBox:GetAttribute("Price"), math.floor(tierPrice * 0.5), "half price")
+	truthy(saleBox.PrimaryPart:FindFirstChildOfClass("Sparkles"), "gold sparkles")
+	emptyHands(p1)
+	Data.AddCash(p1, tierPrice)
+	profile(p1).Strength = 5000
+	local cash = profile(p1).Cash
+	Engine.teleport(p1, saleBox.PrimaryPart.Position + Vector3.new(0, 0, 4))
+	Engine.trigger(saleBox.PrimaryPart.BuyPrompt, p1)
+	eq(profile(p1).Cash, cash - math.floor(tierPrice * 0.5), "charged the sale price")
+	emptyHands(p1)
+	-- shred effect when a box reaches the end
+	Engine.clearLog()
+	Sched.advance(Config.Conveyor.Length / Config.Conveyor.Speed + 2)
+	local shred = false
+	for _, e in ipairs(Engine.sentTo(p1, "PlayEffect")) do if e[1] == "Shred" then shred = true end end
+	truthy(shred, "shred effect fired")
+end)
+
+test("fireworks fire on Legendary+ unwraps; tools carry pictures via icon aliases", function()
+	emptyHands(p1)
+	Data.AddCash(p1, 100)
+	Engine.clearLog()
+	forceRarity("Legendary") buyBox(p1, "Small") deposit(p1) resetRolls()
+	local fw = false
+	for _, e in ipairs(Engine.sentTo(p1, "PlayEffect")) do if e[1] == "Fireworks" then fw = true end end
+	truthy(fw, "fireworks")
+	local Icons = require(RS.Shared.Icons)
+	eq(Icons.Get("Tools", "Barbell"), nil, "no picture until the alias target has an id")
+	Icons.Currency.Strength = 4242
+	eq(Icons.Get("Tools", "Barbell"), "rbxassetid://4242", "barbell uses the strength icon")
+	Icons.Currency.Strength = 0
+	-- ReplicatedStorage.Icons folder route (Studio bulk import + insert)
+	local folder = Instance.new("Folder") folder.Name = "Icons" folder.Parent = RS
+	local decal = Instance.new("Decal") decal.Name = "ui_Shop" decal.Texture = "rbxassetid://555" decal.Parent = folder
+	Icons.ClearCache()
+	eq(Icons.Get("UI", "Shop"), "rbxassetid://555", "decal in the Icons folder is used")
+	eq(Icons.Get("Tools", "Bat"), nil)
+	local d2 = Instance.new("Decal") d2.Name = "present_CandyCaneSword" d2.Texture = "rbxassetid://777" d2.Parent = folder
+	Icons.ClearCache()
+	eq(Icons.Get("Tools", "Bat"), "rbxassetid://777", "bat picture via alias + folder")
+	folder:Destroy()
+	Icons.ClearCache()
+	eq(Icons.Get("UI", "Shop"), nil)
+end)
+
 ---------------------------------------------------------------- new systems
 test("anti-teleport: depositing a stolen present instantly is refused and it returns home", function()
 	emptyHands(p1) emptyHands(p2)

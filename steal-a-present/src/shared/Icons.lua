@@ -138,13 +138,61 @@ Icons.Textures = {
 -- which pattern each box tier wears (nil = plain color)
 Icons.BoxWrap = { Small = "CandyCane", Medium = "Snowflakes", Large = "PolkaDots", Huge = "Hearts", Giant = "PolkaDots", Gift = "Hearts" }
 
+-- Tool hotbar pictures (Tool.TextureId). 0 = use the alias below (reuses existing art)
+Icons.Tools = { Bat = 0, Snowball = 0, Barbell = 0 }
+Icons.Alias = {
+	Tools = { Bat = { "Presents", "CandyCaneSword" }, Snowball = { "Currency", "Snowflakes" }, Barbell = { "Currency", "Strength" } },
+}
+
+-- file-name prefix per category (matches assets/images/*.png and the ReplicatedStorage.Icons folder)
+Icons.Prefix = { UI = "ui_", Currency = "cur_", Boxes = "box_", Traps = "trap_", Mutations = "mut_", Passes = "pass_", Products = "prod_", Presents = "present_", Textures = "wrapping_", Tools = "tool_" }
+
+-- ZERO-TYPING OPTION: in Studio, Bulk Import the PNGs (Asset Manager > Images), select them all,
+-- right-click > Insert, then drag the inserted Decals into a Folder named "Icons" in ReplicatedStorage.
+-- Icons.Get finds them by name (ui_Rewards, present_TeddyBear, ...). Decals, ImageLabels, StringValues
+-- and IntValues all work.
+local folderCache = {}
+local function fromFolder(category, key)
+	local ok, folder = pcall(function()
+		return game:GetService("ReplicatedStorage"):FindFirstChild("Icons")
+	end)
+	if not ok or not folder then return nil end
+	local name = (Icons.Prefix[category] or "") .. tostring(key)
+	if folderCache[name] ~= nil then return folderCache[name] or nil end
+	local obj = folder:FindFirstChild(name) or folder:FindFirstChild(name .. ".png")
+	local result = nil
+	if obj then
+		if obj:IsA("Decal") then
+			result = obj.Texture ~= "" and obj.Texture or nil
+		elseif obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
+			result = obj.Image ~= "" and obj.Image or nil
+		elseif obj:IsA("StringValue") then
+			result = obj.Value ~= "" and obj.Value or nil
+		elseif obj:IsA("IntValue") or obj:IsA("NumberValue") then
+			result = obj.Value > 0 and ("rbxassetid://" .. math.floor(obj.Value)) or nil
+		end
+	end
+	folderCache[name] = result or false
+	return result
+end
+
 function Icons.Get(category, key)
 	local group = Icons[category]
 	local id = group and group[key]
 	if type(id) == "number" and id > 0 then
 		return "rbxassetid://" .. id
 	end
+	local fromF = fromFolder(category, key)
+	if fromF then return fromF end
+	local alias = Icons.Alias[category] and Icons.Alias[category][key]
+	if alias then
+		return Icons.Get(alias[1], alias[2])
+	end
 	return nil
+end
+
+function Icons.ClearCache()
+	folderCache = {}
 end
 
 return Icons
