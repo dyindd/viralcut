@@ -65,6 +65,23 @@ function UIKit.Darken(color, factor)
 	return Color3.new(color.R * factor, color.G * factor, color.B * factor)
 end
 
+-- IMPORTANT: a UIGradient MULTIPLIES the parent's BackgroundColor3. Every gradient element
+-- therefore uses a white background and puts the real color in the gradient.
+local function setGradient(obj, color)
+	local grad = obj:FindFirstChildOfClass("UIGradient")
+	if grad then
+		grad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, color), ColorSequenceKeypoint.new(1, UIKit.Darken(color, 0.75)) })
+	else
+		obj.BackgroundColor3 = color
+	end
+end
+
+-- Change a button's color (works for anything built by UIKit.Button / IconButton)
+function UIKit.SetButtonColor(button, color)
+	button:SetAttribute("BaseColor", color)
+	setGradient(button, color)
+end
+
 -- Animated rainbow gradient (for Secret / Mythic / Galaxy)
 function UIKit.Rainbow(parent, speed)
 	local g = UIKit.Create("UIGradient", { Color = Theme.Rainbow, Rotation = 0, Parent = parent })
@@ -135,7 +152,7 @@ function UIKit.Button(props)
 		Size = props.Size or UDim2.new(0, 200, 0, 60),
 		Position = props.Position or UDim2.new(0, 0, 0, 0),
 		AnchorPoint = props.AnchorPoint or Vector2.new(0, 0),
-		BackgroundColor3 = color,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		AutoButtonColor = false,
 		Text = "",
 		ZIndex = props.ZIndex or 2,
@@ -169,13 +186,8 @@ function UIKit.SetButtonEnabled(button, enabled, disabledText)
 	local label = button:FindFirstChild("Text")
 	button.Active = enabled
 	button.AutoButtonColor = false
-	local grad = button:FindFirstChildOfClass("UIGradient")
 	local base = button:GetAttribute("BaseColor") or Theme.Colors.Green
-	local color = enabled and base or Theme.Colors.Grey
-	button.BackgroundColor3 = color
-	if grad then
-		grad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, color), ColorSequenceKeypoint.new(1, UIKit.Darken(color, 0.75)) })
-	end
+	setGradient(button, enabled and base or Theme.Colors.Grey)
 	if label and disabledText and not enabled then label.Text = disabledText end
 end
 
@@ -193,12 +205,13 @@ function UIKit.IconButton(props)
 	local button = UIKit.Create("TextButton", {
 		Name = "Button",
 		Size = UDim2.new(0, size, 0, size),
-		BackgroundColor3 = color,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		AutoButtonColor = false,
 		Text = "",
 		ZIndex = 2,
 		Parent = holder,
 	})
+	button:SetAttribute("BaseColor", color)
 	UIKit.Corner(button, 18)
 	UIKit.Gradient(button, color, UIKit.Darken(color, 0.72), 90)
 	UIKit.Stroke(button, Theme.Stroke)
@@ -279,7 +292,7 @@ function UIKit.Panel(props)
 	-- close button
 	local close = UIKit.Create("TextButton", {
 		Name = "Close", Size = UDim2.new(0, 64, 0, 64), Position = UDim2.new(1, 10, 0, -18), AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = Theme.Colors.Red, AutoButtonColor = false, Text = "", ZIndex = 15, Parent = root,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), AutoButtonColor = false, Text = "", ZIndex = 15, Parent = root,
 	})
 	UIKit.Corner(close, 16)
 	UIKit.Gradient(close, Theme.Colors.Red, Theme.Colors.RedDark, 90)
@@ -410,7 +423,7 @@ function UIKit.ProgressBar(props)
 	UIKit.Corner(frame, 999)
 	UIKit.Stroke(frame, Theme.StrokeThin)
 	local fill = UIKit.Create("Frame", {
-		Name = "Fill", Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = props.Color or Theme.Colors.Green, ZIndex = (props.ZIndex or 13) + 1, Parent = frame,
+		Name = "Fill", Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(255, 255, 255), ZIndex = (props.ZIndex or 13) + 1, Parent = frame,
 	})
 	UIKit.Corner(fill, 999)
 	UIKit.Gradient(fill, props.Color or Theme.Colors.Green, UIKit.Darken(props.Color or Theme.Colors.Green, 0.75), 90)

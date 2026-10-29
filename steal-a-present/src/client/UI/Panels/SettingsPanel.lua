@@ -29,7 +29,7 @@ function SettingsPanel.Create(HUD)
 			end })
 		toggles[key] = function(value)
 			btn.Text.Text = value and "ON" or "OFF"
-			btn.BackgroundColor3 = value and Theme.Colors.Green or Theme.Colors.Red
+			UIKit.SetButtonColor(btn, value and Theme.Colors.Green or Theme.Colors.Red)
 		end
 	end
 	toggleRow("Music", "🎵 Music", 1)

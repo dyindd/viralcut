@@ -99,7 +99,7 @@ end
 local function currencyPill(parent, icon, color, order)
 	local holder = UIKit.Create("Frame", { Size = UDim2.new(0, 260, 0, 58), BackgroundTransparency = 1, LayoutOrder = order, Parent = parent })
 	local circle = UIKit.Create("Frame", { Size = UDim2.new(0, 54, 0, 54), Position = UDim2.new(0, 0, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5),
-		BackgroundColor3 = color, ZIndex = 3, Parent = holder })
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), ZIndex = 3, Parent = holder })
 	UIKit.Corner(circle, 27)
 	UIKit.Stroke(circle, Theme.Stroke)
 	UIKit.Gradient(circle, color, UIKit.Darken(color, 0.7), 90)
@@ -126,7 +126,8 @@ function HUD.Build()
 	HUD.Layers.Overlay = UIKit.Create("Frame", { Name = "OverlayLayer", Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 40, Parent = gui })
 
 	------------------------------------------------------------------ top-left: currencies + base status
-	local topLeft = makeDock("TopLeft", Vector2.new(0, 0), UDim2.new(0, 14, 0, 14), UDim2.new(0, 280, 0, 260))
+	-- IgnoreGuiInset is on, so keep clear of Roblox's own top bar (~58px) ourselves
+	local topLeft = makeDock("TopLeft", Vector2.new(0, 0), UDim2.new(0, 14, 0, 66), UDim2.new(0, 280, 0, 260))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = topLeft })
 	HUD.CashPill = currencyPill(topLeft, "💵", Theme.Colors.Green, 1)
 	HUD.SnowPill = currencyPill(topLeft, "❄️", Theme.Colors.Cyan, 2)
@@ -147,7 +148,8 @@ function HUD.Build()
 	buttons.Lock = UIKit.IconButton({ Icon = "🔒", Label = "Lock Base", Color = Theme.Colors.Blue, LayoutOrder = 4, Parent = left, OnClick = function() Remotes.Get("LockBase"):FireServer() end })
 
 	------------------------------------------------------------------ bottom bar
-	local bottom = makeDock("Bottom", Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -10), UDim2.new(0, 700, 0, 100))
+	-- sits ABOVE the Roblox tool hotbar (bat / snowball) instead of covering it
+	local bottom = makeDock("Bottom", Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -84), UDim2.new(0, 700, 0, 100))
 	UIKit.Create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		VerticalAlignment = Enum.VerticalAlignment.Bottom, SortOrder = Enum.SortOrder.LayoutOrder, Parent = bottom })
 	local bsize = Theme.BottomButton
@@ -178,14 +180,14 @@ function HUD.Build()
 	HUD.RewardsBadgeText = UIKit.Text({ Text = "1", TextSize = 18, ZIndex = 6, Parent = HUD.RewardsBadge })
 
 	------------------------------------------------------------------ top: season + event + grinch timers
-	local top = makeDock("Top", Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 8), UDim2.new(0, 520, 0, 120))
+	local top = makeDock("Top", Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 12), UDim2.new(0, 520, 0, 120))
 	HUD.SeasonLabel = UIKit.Text({ Text = "", Size = UDim2.new(1, 0, 0, 26), TextSize = 22, Color = Theme.Colors.Yellow, Parent = top })
 	HUD.EventTitle = UIKit.Text({ Text = "Next Event", Size = UDim2.new(1, 0, 0, 34), Position = UDim2.new(0, 0, 0, 24), TextSize = 32, StrokeThickness = 3, Parent = top })
 	HUD.EventBar = UIKit.ProgressBar({ Size = UDim2.new(0, 320, 0, 22), Position = UDim2.new(0.5, 0, 0, 62), AnchorPoint = Vector2.new(0.5, 0), Color = Theme.Colors.Cyan, Parent = top })
 	HUD.GrinchLine = UIKit.Text({ Text = "", Size = UDim2.new(1, 0, 0, 28), Position = UDim2.new(0, 0, 0, 88), TextSize = 24, Color = Color3.fromRGB(120, 255, 140), Parent = top })
 
 	------------------------------------------------------------------ carry card (bottom center, above the bar)
-	local carry = makeDock("Carry", Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -120), UDim2.new(0, 520, 0, 86))
+	local carry = makeDock("Carry", Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -196), UDim2.new(0, 520, 0, 86))
 	local card = UIKit.Create("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Theme.Colors.Panel, Visible = false, ZIndex = 3, Parent = carry })
 	UIKit.Corner(card, 16)
 	UIKit.Stroke(card, Theme.Stroke)

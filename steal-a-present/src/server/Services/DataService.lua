@@ -26,6 +26,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Util = require(ReplicatedStorage.Shared.Util)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Registry = require(script.Parent.Parent.Registry)
+local RateLimiter = require(script.Parent.Parent.RateLimiter)
 
 local DataService = {}
 
@@ -329,6 +330,7 @@ end
 function DataService.Init()
 	getStore()
 	Remotes.Get("GetProfile").OnServerInvoke = function(player)
+		if not RateLimiter.Check(player, "Default") then return nil end
 		-- wait briefly for the profile if the client asks before load finishes
 		local t = 0
 		while not profiles[player.UserId] and t < 15 do

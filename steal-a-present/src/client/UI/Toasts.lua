@@ -19,8 +19,8 @@ local container
 local function push(text, color, big, duration)
 	local height = big and 58 or 42
 	local toast = UIKit.Create("Frame", {
-		Size = UDim2.new(0, big and 760 or 520, 0, height), BackgroundColor3 = color or Theme.Colors.Blue,
-		BackgroundTransparency = 0, ZIndex = 31, LayoutOrder = -os.clock() * 1000, Parent = container,
+		Size = UDim2.new(0, big and 760 or 520, 0, height), BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 0, ZIndex = 31, LayoutOrder = -math.floor(os.clock() * 1000), Parent = container,
 	})
 	UIKit.Corner(toast, 14)
 	UIKit.Stroke(toast, Theme.Stroke)

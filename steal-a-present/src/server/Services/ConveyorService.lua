@@ -50,15 +50,25 @@ local function tryTake(player, tierKey, model, price)
 		Notify().Notify(player, string.format("Too heavy! You need %s Strength (train at your bench).", Util.FormatNumber(tier.Strength)), "error")
 		return false
 	end
+	if not Validate.GetRoot(player) then
+		return false -- dead / no character
+	end
 	if price > 0 then
 		if not Data().SpendCash(player, price) then
 			Notify().Notify(player, "Not enough cash! Need $" .. Util.FormatNumber(price), "error")
 			return false
 		end
+	end
+	local ok = Carry.Give(player, { Kind = "Box", Tier = tier.Key, Model = model })
+	if not ok then
+		if price > 0 then Data().AddCash(player, price) end -- refund, nothing was taken
+		return false
+	end
+	if price > 0 then
 		profile.Stats.Bought = (profile.Stats.Bought or 0) + 1
 		Registry.Get("QuestService").Progress(player, "Buy", 1)
 	end
-	return Carry.Give(player, { Kind = "Box", Tier = tier.Key, Model = model })
+	return true
 end
 
 ---------------------------------------------------------------------------

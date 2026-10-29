@@ -28,7 +28,7 @@ function TrapsPanel.Create(HUD)
 			local def
 			for _, d in ipairs(Config.Traps.List) do if d.Key == current then def = d end end
 			b.Text.Text = "Socket " .. i .. ": " .. (def and def.Name or "Empty")
-			b.BackgroundColor3 = i == selectedSocket and Theme.Colors.Green or Theme.Colors.Blue
+			UIKit.SetButtonColor(b, i == selectedSocket and Theme.Colors.Green or Theme.Colors.Blue)
 		end
 		for _, c in ipairs(grid:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
 		for i, def in ipairs(Config.Traps.List) do

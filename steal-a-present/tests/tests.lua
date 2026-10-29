@@ -79,6 +79,7 @@ test("Commas / FormatTime", function()
 	eq(Util.Commas(999), "999")
 	eq(Util.FormatTime(125), "2:05")
 	eq(Util.FormatTime(3725), "1:02:05")
+	eq(Util.FormatTime(90000), "1d 1h")
 end)
 
 test("WeightedPickDict respects weights (statistically)", function()

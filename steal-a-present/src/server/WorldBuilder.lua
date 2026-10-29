@@ -212,7 +212,7 @@ local function buildPlot(index, world)
 	local sockets = Instance.new("Folder")
 	sockets.Name = "TrapSockets"
 	sockets.Parent = plot
-	local socketOffsets = { Vector3.new(-8, 1.05, -6), Vector3.new(8, 1.05, -6), Vector3.new(0, 1.05, 14) }
+	local socketOffsets = { Vector3.new(-8, 1.05, -7), Vector3.new(8, 1.05, -7), Vector3.new(-18, 1.05, 16) }
 	for i = 1, Config.Traps.Sockets do
 		local off = socketOffsets[i] or Vector3.new(0, 1.05, 0)
 		local s = part({ Name = "Socket" .. i, Size = Vector3.new(0.2, 5, 5), CFrame = cf * CFrame.new(off) * CFrame.Angles(0, 0, math.rad(90)),

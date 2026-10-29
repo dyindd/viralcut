@@ -45,6 +45,11 @@ end
 -- 125 -> "2:05", 3725 -> "1:02:05"
 function Util.FormatTime(seconds)
 	seconds = math.max(0, math.floor((tonumber(seconds) or 0) + 0.5))
+	if seconds >= 86400 then
+		local d = math.floor(seconds / 86400)
+		local hh = math.floor((seconds % 86400) / 3600)
+		return string.format("%dd %dh", d, hh)
+	end
 	local h = math.floor(seconds / 3600)
 	local m = math.floor((seconds % 3600) / 60)
 	local s = seconds % 60

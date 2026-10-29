@@ -65,6 +65,7 @@ local function grantReward(player, profile, reward)
 		profile.BonusSlots = (profile.BonusSlots or 0) + (reward.Amount or 1)
 		local plot = Registry.Get("PlotService").GetPlot(player)
 		if plot then Registry.Get("PlotService").RefreshSlots(plot) end
+		Registry.Get("PlotService").SendBaseState(player)
 		return "+" .. (reward.Amount or 1) .. " base slot"
 	end
 	return "a reward"

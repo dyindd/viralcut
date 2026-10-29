@@ -67,7 +67,7 @@ local function buildTrapModel(plot, socket, def)
 		elf.CanCollide = false
 		elf.Size = Vector3.new(2, 4, 2)
 		elf.Color = Color3.fromRGB(80, 200, 90)
-		elf.CFrame = socket.CFrame * CFrame.new(2.5, 0, 0)
+		elf.CFrame = CFrame.new(socket.Position + Vector3.new(0, 2.5, 0))
 		elf.Parent = model
 	end
 	model.Parent = plot.Model
