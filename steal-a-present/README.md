@@ -96,7 +96,7 @@ src/
 
 tests/
   tests.lua + run_tests.py        logic tests for the shared modules
-  scenarios.lua + run_scenarios.py 44 end-to-end scenarios: the REAL server and client running in a headless engine
+  scenarios.lua + run_scenarios.py 45 end-to-end scenarios: the REAL server and client running in a headless engine
   engine/                          the mini Roblox runtime (see docs/TESTING.md)
   econ_sim.py                      pacing simulation (reads the real Config)
 ```

@@ -9,7 +9,7 @@ remotes, leave and rejoin, and jump the calendar forward.
 ```bash
 pip install lupa                 # a Lua VM embedded in Python
 python3 tests/run_tests.py       # unit tests for shared modules (odds sum to 100, formatting, seasons...)
-python3 tests/run_scenarios.py   # 44 end-to-end scenarios against the real server + client
+python3 tests/run_scenarios.py   # 45 end-to-end scenarios against the real server + client
 python3 tests/econ_sim.py        # pacing simulation (first Rare, first rebirth...)
 ```
 
