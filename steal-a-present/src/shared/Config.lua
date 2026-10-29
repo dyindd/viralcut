@@ -125,7 +125,9 @@ Config.Carry = {
 }
 
 Config.Strength = {
-	GainPerSecond = 1,            -- base strength per second on the training bench
+	GainPerLift = 1,              -- strength per LIFT (click / tap / F). No passive gain, so no AFK farming
+	LiftCooldown = 0.45,          -- seconds between counted lifts
+	GainPerSecond = 1,            -- used by tests/econ_sim.py as "average lifts per second"
 	RebirthBonusPerLevel = 0.5,   -- +50% training speed per rebirth
 	ProteinMultiplier = 2,        -- dev product "Protein Shake" (temporary)
 	ProteinDuration = 15 * 60,
@@ -147,7 +149,7 @@ Config.Plots = {
 
 Config.Lock = {
 	Duration = 60,               -- seconds the shield stays up
-	Cooldown = 180,              -- seconds before you can lock again (starts when the lock ends)
+	Cooldown = 300,              -- seconds before you can lock again (5 min, starts when the lock ends)
 	VIPDurationBonus = 30,       -- VIP gamepass adds this many seconds
 	ExtendProductSeconds = 300,  -- dev product "Lock Extender" adds this
 }
@@ -222,7 +224,7 @@ Config.Events = {
 	},
 	DoubleCash = { Multiplier = 2 },
 	MutationMadness = { Multiplier = 3 },
-	SleighDrop = { SackCount = 10, DropHeight = 60, Radius = 90 },
+	SleighDrop = { MinSacks = 1, MaxSacks = 7, DropHeight = 60, Radius = 90, FlightSeconds = 9, Height = 70 },
 	KrampusNight = { LockMultiplier = 0.5, CursedChance = 15 }, -- percent chance an unwrap is Cursed
 	LuckyHour = { LuckMultiplier = 2 },
 	MutationBoost = 10,
@@ -432,6 +434,7 @@ Config.RateLimits = {
 	Claim = { Calls = 5, Per = 5 },
 	Throw = { Calls = 3, Per = 1 },
 	Code = { Calls = 3, Per = 10 },
+	Lift = { Calls = 5, Per = 1 },
 }
 Config.MaxInteractDistance = 12               -- generic distance check for prompts/pads
 Config.KickOnDataFail = true                  -- kick instead of letting someone play with no data

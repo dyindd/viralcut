@@ -361,6 +361,13 @@ function UIKit.IconButton(props)
 	UIKit.Corner(badge, 15)
 	UIKit.Stroke(badge, 2.5)
 	local badgeText = UIKit.Text({ Text = "!", TextSize = 18, ZIndex = 6, Parent = badge })
+	if props.Tooltip then
+		local tip = UIKit.Create("Frame", { Name = "Tooltip", Size = UDim2.new(0, 160, 0, 32), Position = UDim2.new(0.5, 0, 0, -6), AnchorPoint = Vector2.new(0.5, 1), BackgroundColor3 = Theme.Colors.Outline, BackgroundTransparency = 0.1, Visible = false, ZIndex = 8, Parent = holder })
+		UIKit.Corner(tip, 10)
+		UIKit.Text({ Text = props.Tooltip, TextSize = 18, Scaled = true, MaxTextSize = 18, ZIndex = 9, Parent = tip })
+		button.MouseEnter:Connect(function() tip.Visible = true end)
+		button.MouseLeave:Connect(function() tip.Visible = false end)
+	end
 	pressFx(button, scale)
 	if props.OnClick then
 		button.Activated:Connect(function() props.OnClick() end)

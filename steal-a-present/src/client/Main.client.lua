@@ -39,6 +39,8 @@ require(Controllers.SoundController).Start()
 require(Controllers.EffectsController).Start()
 require(Controllers.InputController).Start(HUD)
 require(Controllers.GuideController).Start(HUD)
+require(Controllers.HoverController).Start(HUD)
+require(Controllers.TrainingController).Start(HUD)
 task.spawn(function() require(Controllers.PromptController).Start() end)
 
 -- initial snapshot (in case DataChanged fired before we were listening)

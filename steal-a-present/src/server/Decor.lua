@@ -397,13 +397,13 @@ function Decor.Barbell()
 		weld.Part1 = plate
 		weld.Parent = plate
 	end
-	tool.Grip = CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.rad(90))
+	tool.Grip = CFrame.new(0, -0.2, 0) -- bar runs across the body
 	local Icons = require(game:GetService("ReplicatedStorage").Shared.Icons)
 	tool.TextureId = Icons.Get("Tools", "Barbell") or ""
 	return tool
 end
-Decor.GripDown = CFrame.new(0, 0.6, 0) * CFrame.Angles(0, 0, math.rad(90))
-Decor.GripUp = CFrame.new(0, -2.6, -0.4) * CFrame.Angles(0, 0, math.rad(90))
+Decor.GripDown = CFrame.new(0, -0.2, 0)
+Decor.GripUp = CFrame.new(0, -2.3, 0)
 
 ---------------------------------------------------------------------------
 -- Reindeer (brown body, antlers, red nose, bells)
@@ -624,6 +624,30 @@ function Decor.LaunchPad(parent, cf, color)
 	em.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
 	em.LightEmission = 1
 	em.Parent = pad
+	-- a real cannon aimed at the hub so the pad reads as "launch"
+	local iron = Color3.fromRGB(45, 45, 58)
+	local barrelCF = cf * CFrame.new(3.6, 2.4, 0.8) * CFrame.Angles(0, math.rad(90), 0) * CFrame.Angles(0, 0, math.rad(30))
+	part({ Name = "Barrel", Shape = "Cylinder", Size = Vector3.new(5, 1.8, 1.8), CFrame = barrelCF, Color = iron, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	part({ Name = "Muzzle", Shape = "Cylinder", Size = Vector3.new(0.7, 2.3, 2.3), CFrame = barrelCF * CFrame.new(2.4, 0, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	part({ Name = "Band", Shape = "Cylinder", Size = Vector3.new(0.4, 2.0, 2.0), CFrame = barrelCF * CFrame.new(-0.6, 0, 0), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	for _, dx in ipairs({ -1.2, 1.2 }) do
+		part({ Name = "Wheel", Shape = "Cylinder", Size = Vector3.new(0.5, 2.2, 2.2), CFrame = cf * CFrame.new(3.6 + dx, 1.1, 1.2), Color = Decor.Colors.Wood, Material = Enum.Material.Wood, CanCollide = false, Parent = m })
+	end
+	local bb = Instance.new("BillboardGui")
+	bb.Size = UDim2.new(0, 170, 0, 36)
+	bb.StudsOffset = Vector3.new(0, 4.5, 0)
+	bb.MaxDistance = 50
+	bb.Parent = pad
+	local tl = Instance.new("TextLabel")
+	tl.BackgroundTransparency = 1
+	tl.Size = UDim2.new(1, 0, 1, 0)
+	tl.Font = Enum.Font.FredokaOne
+	tl.TextScaled = true
+	tl.Text = "🚀 LAUNCH CANNON"
+	tl.TextColor3 = Color3.fromRGB(255, 230, 120)
+	tl.TextStrokeTransparency = 0
+	tl.Parent = bb
+	m:SetAttribute("Tooltip", "Launch Cannon: step on the pad with empty hands to fly to the conveyor!")
 	return pad
 end
 
@@ -681,6 +705,24 @@ function Decor.FaceText(part, text, color, size, face)
 	stroke.Color = Color3.fromRGB(35, 25, 20)
 	stroke.Parent = tl
 	return gui
+end
+
+function Decor.Santa(parent, cf, scale)
+	local s = scale or 1
+	local m = model("Santa", parent)
+	local body = part({ Name = "Body", Shape = "Ball", Size = Vector3.new(3 * s, 3.2 * s, 2.6 * s), CFrame = cf * CFrame.new(0, 1.8 * s, 0), Color = Decor.Colors.Red, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	m.PrimaryPart = body
+	part({ Name = "Belt", Size = Vector3.new(3.05 * s, 0.5 * s, 2.65 * s), CFrame = cf * CFrame.new(0, 1.6 * s, 0), Color = Color3.fromRGB(25, 25, 30), CanCollide = false, Parent = m })
+	part({ Name = "Buckle", Size = Vector3.new(0.8 * s, 0.6 * s, 0.2 * s), CFrame = cf * CFrame.new(0, 1.6 * s, -1.35 * s), Color = Decor.Colors.Gold, Material = Enum.Material.Metal, CanCollide = false, Parent = m })
+	part({ Name = "Head", Shape = "Ball", Size = Vector3.new(1.7 * s, 1.7 * s, 1.7 * s), CFrame = cf * CFrame.new(0, 4 * s, 0), Color = Color3.fromRGB(255, 215, 185), CanCollide = false, Parent = m })
+	part({ Name = "Beard", Shape = "Ball", Size = Vector3.new(1.8 * s, 1.5 * s, 1.0 * s), CFrame = cf * CFrame.new(0, 3.5 * s, -0.6 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "HatBrim", Shape = "Cylinder", Size = Vector3.new(0.5 * s, 1.9 * s, 1.9 * s), CFrame = cf * CFrame.new(0, 4.8 * s, 0) * CFrame.Angles(0, 0, math.rad(90)), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	part({ Name = "Hat", Shape = "Wedge", Size = Vector3.new(1.6 * s, 1.8 * s, 1.6 * s), CFrame = cf * CFrame.new(0, 5.8 * s, 0.1 * s) * CFrame.Angles(0, math.rad(180), 0), Color = Decor.Colors.Red, CanCollide = false, Parent = m })
+	part({ Name = "Pom", Shape = "Ball", Size = Vector3.new(0.6 * s, 0.6 * s, 0.6 * s), CFrame = cf * CFrame.new(0, 6.7 * s, -0.5 * s), Color = Decor.Colors.White, CanCollide = false, Parent = m })
+	for _, x in ipairs({ -1, 1 }) do
+		part({ Name = "Arm", Size = Vector3.new(0.8 * s, 2 * s, 0.8 * s), CFrame = cf * CFrame.new(x * 1.7 * s, 2.6 * s, -0.4 * s) * CFrame.Angles(math.rad(-50), 0, 0), Color = Decor.Colors.Red, Material = Enum.Material.Fabric, CanCollide = false, Parent = m })
+	end
+	return m
 end
 
 return Decor

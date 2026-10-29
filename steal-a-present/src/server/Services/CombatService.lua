@@ -36,7 +36,7 @@ local function makeBat()
 	tool.CanBeDropped = false
 	tool.ToolTip = "Whack thieves!"
 	tool.TextureId = Icons.Get("Tools", "Bat") or ""
-	tool.Grip = CFrame.new(0, -1.2, 0) * CFrame.Angles(math.rad(90), 0, 0)
+	tool.Grip = CFrame.new(0, -1.4, 0) -- held upright like a bat
 	local handle = Instance.new("Part")
 	handle.Name = "Handle"
 	handle.Size = Vector3.new(0.6, 4, 0.6)

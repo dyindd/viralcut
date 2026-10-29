@@ -26,9 +26,9 @@ local rng = Random.new(7)
 local function label(parent, text, color, offsetY, maxDistance)
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Label"
-	bb.Size = UDim2.new(0, 190, 0, 42)
+	bb.Size = UDim2.new(0, 150, 0, 34)
 	bb.StudsOffset = Vector3.new(0, offsetY or 3, 0)
-	bb.MaxDistance = maxDistance or 110
+	bb.MaxDistance = maxDistance or 50
 	bb.Parent = parent
 	local tl = Instance.new("TextLabel")
 	tl.Name = "Text"
@@ -364,7 +364,7 @@ local function buildPlot(index, world)
 
 	-- deposit pad under an "UNWRAP HERE" candy arch
 	local deposit = part({ Name = "DepositPad", Size = Vector3.new(9, 0.4, 9), CFrame = cf * CFrame.new(0, 1.2, -11), Color = Color3.fromRGB(90, 255, 120), Material = Enum.Material.Neon, Parent = plot })
-	label(deposit, "DROP PRESENTS HERE", Color3.fromRGB(140, 255, 160), 3)
+	deposit:SetAttribute("Tooltip", "Unwrap Pad: bring boxes here to unwrap them!")
 	local padGlow = Instance.new("ParticleEmitter")
 	padGlow.Rate = 6
 	padGlow.Lifetime = NumberRange.new(1.2, 1.8)
@@ -385,9 +385,11 @@ local function buildPlot(index, world)
 	-- collect pad + gold vault
 	local collect = part({ Name = "CollectPad", Size = Vector3.new(6, 0.4, 6), CFrame = cf * CFrame.new(-15, 1.2, -11), Color = C.Gold, Material = Enum.Material.Neon, Parent = plot })
 	label(collect, "$ COLLECT", Color3.fromRGB(255, 230, 120), 3).Name = "CollectLabel"
+	collect:SetAttribute("Tooltip", "Collect Pad: step here to bank your cash pile")
 	local vault = part({ Name = "Vault", Size = Vector3.new(4, 3.2, 3), CFrame = cf * CFrame.new(-15, 2.6, -16.5), Color = C.Gold, Material = Enum.Material.Metal, Reflectance = 0.35, Parent = plot })
 	part({ Name = "VaultLid", Size = Vector3.new(4.2, 0.6, 3.2), CFrame = cf * CFrame.new(-15, 4.4, -16.5), Color = Color3.fromRGB(200, 150, 40), Material = Enum.Material.Metal, CanCollide = false, Parent = plot })
 	Decor.FaceText(vault, "$", Color3.fromRGB(60, 40, 10), nil, Enum.NormalId.Front)
+	vault:SetAttribute("Tooltip", "Vault: your uncollected cash")
 	local sparkles = Instance.new("Sparkles")
 	sparkles.SparkleColor = C.Gold
 	sparkles.Parent = vault
@@ -397,6 +399,7 @@ local function buildPlot(index, world)
 	local lockButton = part({ Name = "LockButton", Size = Vector3.new(2.5, 1, 2.5), CFrame = cf * CFrame.new(15, 5, -11), Color = Color3.fromRGB(255, 70, 80), Material = Enum.Material.Neon, Parent = plot })
 	label(lockButton, "🔒 LOCK", C.White, 2.5).Name = "LockLabel"
 	prompt(lockButton, "LockPrompt", "Lock Base", "Shield", 0.25, 10)
+	lockButton:SetAttribute("Tooltip", "Lock Button: shields your base for 60s (once every 5 min)")
 	Decor.Padlock(plot, cf * CFrame.new(15, 5.6, -11), 1.1)
 
 	-- gym: bench (prompt), barbell, mat, rack, punching bag
@@ -404,9 +407,9 @@ local function buildPlot(index, world)
 	part({ Name = "Barbell", Size = Vector3.new(6, 0.5, 0.5), CFrame = cf * CFrame.new(18, 4.2, 8), Color = Color3.fromRGB(40, 40, 50), Material = Enum.Material.Metal, CanCollide = false, Parent = plot })
 	part({ Name = "WeightL", Shape = "Cylinder", Size = Vector3.new(0.6, 2, 2), CFrame = cf * CFrame.new(15.3, 4.2, 8), Color = Color3.fromRGB(30, 30, 35), CanCollide = false, Parent = plot })
 	part({ Name = "WeightR", Shape = "Cylinder", Size = Vector3.new(0.6, 2, 2), CFrame = cf * CFrame.new(20.7, 4.2, 8), Color = Color3.fromRGB(30, 30, 35), CanCollide = false, Parent = plot })
-	label(bench, "💪 TRAIN STRENGTH", C.White, 4).Name = "BenchLabel"
+	label(bench, "💪 TRAIN", C.White, 4).Name = "BenchLabel"
 	prompt(bench, "TrainPrompt", "Train", "Bench", 0, 8)
-	Decor.GymSet(plot, cf * CFrame.new(17, 1, 9))
+	bench:SetAttribute("Tooltip", "Training Bench: press Train, then click / tap LIFT for Strength")
 
 	-- trap sockets
 	local sockets = Instance.new("Folder")
@@ -420,6 +423,7 @@ local function buildPlot(index, world)
 		s:SetAttribute("SocketIndex", i)
 		s:SetAttribute("Trap", "")
 		prompt(s, "TrapPrompt", "Place Trap", "Empty socket", 0, 8)
+		s:SetAttribute("Tooltip", "Trap Socket: place a trap to stop thieves")
 	end
 
 	-- pedestals (slots): stone top + colored rim; hidden until unlocked (PlotService.RefreshSlots)
@@ -441,7 +445,7 @@ local function buildPlot(index, world)
 
 	-- reward delivery spot + mailbox, owner spawn point, decorations
 	part({ Name = "Delivery", Size = Vector3.new(4, 0.2, 4), CFrame = cf * CFrame.new(-18, 1.1, 4), Color = Color3.fromRGB(255, 150, 220), Material = Enum.Material.Neon, CanCollide = false, Parent = plot })
-	Decor.Mailbox(plot, cf * CFrame.new(-21, 1, 4) * CFrame.Angles(0, math.rad(90), 0), color)
+	Decor.Mailbox(plot, cf * CFrame.new(-21, 1, 4) * CFrame.Angles(0, math.rad(90), 0), color):SetAttribute("Tooltip", "Mailbox: free boxes from rewards land here")
 	part({ Name = "SpawnPoint", Size = Vector3.new(2, 1, 2), CFrame = cf * CFrame.new(0, 3, -size.Z / 2), Transparency = 1, CanCollide = false, Parent = plot })
 	Decor.Tree(plot, cf * CFrame.new(-19.5, 1, 21.5), 0.62, { Layers = 5 })
 	Decor.Snowman(plot, cf * CFrame.new(19.5, 1, 20) * CFrame.Angles(0, math.rad(180), 0), 0.7)
@@ -449,9 +453,7 @@ local function buildPlot(index, world)
 	local pileAnchor = part({ Name = "PileAnchor", Size = Vector3.new(1, 1, 1), CFrame = cf * CFrame.new(20, 1, -18), Transparency = 1, CanCollide = false, CanQuery = false, Parent = plot })
 	-- launch pad just inside the gate: owner only, flings you toward the conveyor when you're not carrying
 	Decor.LaunchPad(plot, cf * CFrame.new(-9, 1.25, -19), color)
-	Decor.Garland(plot, (cf * CFrame.new(-size.X / 2 - 0.5, 4.2, -size.Z / 2 - 0.5)).Position, (cf * CFrame.new(-8, 7.6, -size.Z / 2 - 0.5)).Position)
-	Decor.Garland(plot, (cf * CFrame.new(8, 7.6, -size.Z / 2 - 0.5)).Position, (cf * CFrame.new(size.X / 2 + 0.5, 4.2, -size.Z / 2 - 0.5)).Position)
-	Decor.Penguin(plot, cf * CFrame.new(-19, 1, -14) * CFrame.Angles(0, math.rad(45), 0), 0.7)
+
 
 	-- shield dome (visual only; the server refuses steals while locked)
 	local dome = part({ Name = "Dome", Size = Vector3.new(size.X + 16, size.X + 16, size.X + 16), CFrame = cf * CFrame.new(0, 0, 2), Color = Color3.fromRGB(120, 200, 255), Material = Enum.Material.ForceField, Transparency = 1, CanCollide = false, Shape = "Ball", Parent = plot })

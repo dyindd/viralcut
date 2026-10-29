@@ -122,9 +122,9 @@ local function makeBillboard(model, player, record)
 	local rarity = Catalog.Rarities[record.Rarity]
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "Info"
-	bb.Size = UDim2.new(0, 180, 0, 70)
+	bb.Size = UDim2.new(0, 130, 0, 50)
 	bb.StudsOffset = Vector3.new(0, 3.2 + (model.PrimaryPart and model.PrimaryPart.Size.Y / 2 or 1), 0)
-	bb.MaxDistance = 90
+	bb.MaxDistance = 32
 	bb.Parent = model.PrimaryPart
 	local function line(name, y, h, text, color, size)
 		local tl = Instance.new("TextLabel")
@@ -157,6 +157,9 @@ function PresentService.PlaceModel(plot, player, record)
 	model:SetAttribute("OwnerUserId", player.UserId)
 	model:SetAttribute("BaseCFrame", model:GetPivot()) -- clients bob/spin the model around this
 	makeBillboard(model, player, record)
+	local tipInfo = Catalog.PresentByKey[record.Key]
+	local tipRarity = Catalog.Rarities[record.Rarity]
+	model:SetAttribute("Tooltip", (record.Mutation and (record.Mutation .. " ") or "") .. (tipInfo and tipInfo.Name or record.Key) .. " - " .. (tipRarity and tipRarity.Name or "") .. " - $" .. Util.FormatNumber(PresentService.GetValue(player, record)) .. "/s")
 	-- rarity flair: a neon ring for Rare+, a light pillar + sparkles for Legendary+
 	local rarity = Catalog.Rarities[record.Rarity]
 	if rarity and rarity.Tier >= 4 then

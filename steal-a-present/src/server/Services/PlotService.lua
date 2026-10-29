@@ -361,7 +361,7 @@ function PlotService.UpdatePile(plot, count)
 		plot.PileModel = nil
 	end
 	if count > 0 and plot.PileAnchor then
-		plot.PileModel = Decor.PresentPile(plot.Model, plot.PileAnchor.CFrame, math.min(count, 8))
+		plot.PileModel = Decor.PresentPile(plot.Model, plot.PileAnchor.CFrame, math.min(count, 4))
 	end
 end
 

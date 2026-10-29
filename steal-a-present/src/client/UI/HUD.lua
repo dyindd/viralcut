@@ -23,6 +23,7 @@ local player = Players.LocalPlayer
 local panels = {}
 local buttons = {}
 local docks = {}
+local TOOLTIPS = { Rewards = "Rewards", Rebirth = "Rebirth", Gift = "Gift a present", Lock = "Lock your base", Base = "My Presents", Shop = "Shop", Index = "Present Index", Quests = "Daily Quests", Traps = "Base Defense", Settings = "Settings & Codes" }
 
 ---------------------------------------------------------------------------
 -- Scaling (phones get a smaller UI but buttons stay tappable)
@@ -166,10 +167,10 @@ function HUD.Build()
 	------------------------------------------------------------------ left column
 	local left = makeDock("Left", Vector2.new(0, 0), UDim2.new(0, 14, 0, 400), UDim2.new(0, 110, 0, 498))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 14), SortOrder = Enum.SortOrder.LayoutOrder, Parent = left })
-	buttons.Rewards = UIKit.IconButton({ Image = Icons.Get("UI", "Rewards"), Icon = "🎁", Label = "Rewards", Color = Theme.Colors.Pink, LayoutOrder = 1, Parent = left, OnClick = function() HUD.TogglePanel("Rewards") end })
-	buttons.Rebirth = UIKit.IconButton({ Image = Icons.Get("UI", "Rebirth"), Icon = "🔄", Label = "Rebirth", Color = Theme.Colors.Purple, LayoutOrder = 2, Parent = left, OnClick = function() HUD.TogglePanel("Rebirth") end })
-	buttons.Gift = UIKit.IconButton({ Image = Icons.Get("UI", "Gift"), Icon = "💝", Label = "Gift", Color = Theme.Colors.Red, LayoutOrder = 3, Parent = left, OnClick = function() HUD.TogglePanel("Gift") end })
-	buttons.Lock = UIKit.IconButton({ Image = Icons.Get("UI", "Lock"), Icon = "🔒", Label = "Lock Base", Color = Theme.Colors.Blue, LayoutOrder = 4, Parent = left, OnClick = function() Remotes.Get("LockBase"):FireServer() end })
+	buttons.Rewards = UIKit.IconButton({ Tooltip = TOOLTIPS.Rewards, Image = Icons.Get("UI", "Rewards"), Icon = "🎁", Label = "Rewards", Color = Theme.Colors.Pink, LayoutOrder = 1, Parent = left, OnClick = function() HUD.TogglePanel("Rewards") end })
+	buttons.Rebirth = UIKit.IconButton({ Tooltip = TOOLTIPS.Rebirth, Image = Icons.Get("UI", "Rebirth"), Icon = "🔄", Label = "Rebirth", Color = Theme.Colors.Purple, LayoutOrder = 2, Parent = left, OnClick = function() HUD.TogglePanel("Rebirth") end })
+	buttons.Gift = UIKit.IconButton({ Tooltip = TOOLTIPS.Gift, Image = Icons.Get("UI", "Gift"), Icon = "💝", Label = "Gift", Color = Theme.Colors.Red, LayoutOrder = 3, Parent = left, OnClick = function() HUD.TogglePanel("Gift") end })
+	buttons.Lock = UIKit.IconButton({ Tooltip = TOOLTIPS.Lock, Image = Icons.Get("UI", "Lock"), Icon = "🔒", Label = "Lock Base", Color = Theme.Colors.Blue, LayoutOrder = 4, Parent = left, OnClick = function() Remotes.Get("LockBase"):FireServer() end })
 
 	------------------------------------------------------------------ bottom bar
 	-- sits ABOVE the Roblox tool hotbar (bat / snowball) instead of covering it
@@ -177,12 +178,12 @@ function HUD.Build()
 	UIKit.Create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		VerticalAlignment = Enum.VerticalAlignment.Bottom, SortOrder = Enum.SortOrder.LayoutOrder, Parent = bottom })
 	local bsize = Theme.BottomButton
-	buttons.Base = UIKit.IconButton({ Image = Icons.Get("UI", "Base"), Icon = "📦", Size = bsize, Color = Theme.Colors.Yellow, LayoutOrder = 1, Parent = bottom, OnClick = function() HUD.TogglePanel("Base") end })
-	buttons.Shop = UIKit.IconButton({ Image = Icons.Get("UI", "Shop"), Icon = "🛒", Size = bsize, Color = Theme.Colors.Red, LayoutOrder = 2, Parent = bottom, OnClick = function() HUD.TogglePanel("Shop") end })
-	buttons.Index = UIKit.IconButton({ Image = Icons.Get("UI", "Index"), Icon = "📖", Size = bsize, Color = Theme.Colors.Orange, LayoutOrder = 3, Parent = bottom, OnClick = function() HUD.TogglePanel("Index") end })
-	buttons.Quests = UIKit.IconButton({ Image = Icons.Get("UI", "Quests"), Icon = "⭐", Size = bsize, Color = Theme.Colors.Pink, LayoutOrder = 4, Parent = bottom, OnClick = function() HUD.TogglePanel("Quests") end })
-	buttons.Traps = UIKit.IconButton({ Image = Icons.Get("UI", "Traps"), Icon = "🛡️", Size = bsize, Color = Theme.Colors.Blue, LayoutOrder = 5, Parent = bottom, OnClick = function() HUD.TogglePanel("Traps") end })
-	buttons.Settings = UIKit.IconButton({ Image = Icons.Get("UI", "Settings"), Icon = "⚙️", Size = bsize, Color = Theme.Colors.Grey, LayoutOrder = 6, Parent = bottom, OnClick = function() HUD.TogglePanel("Settings") end })
+	buttons.Base = UIKit.IconButton({ Tooltip = TOOLTIPS.Base, Image = Icons.Get("UI", "Base"), Icon = "📦", Size = bsize, Color = Theme.Colors.Yellow, LayoutOrder = 1, Parent = bottom, OnClick = function() HUD.TogglePanel("Base") end })
+	buttons.Shop = UIKit.IconButton({ Tooltip = TOOLTIPS.Shop, Image = Icons.Get("UI", "Shop"), Icon = "🛒", Size = bsize, Color = Theme.Colors.Red, LayoutOrder = 2, Parent = bottom, OnClick = function() HUD.TogglePanel("Shop") end })
+	buttons.Index = UIKit.IconButton({ Tooltip = TOOLTIPS.Index, Image = Icons.Get("UI", "Index"), Icon = "📖", Size = bsize, Color = Theme.Colors.Orange, LayoutOrder = 3, Parent = bottom, OnClick = function() HUD.TogglePanel("Index") end })
+	buttons.Quests = UIKit.IconButton({ Tooltip = TOOLTIPS.Quests, Image = Icons.Get("UI", "Quests"), Icon = "⭐", Size = bsize, Color = Theme.Colors.Pink, LayoutOrder = 4, Parent = bottom, OnClick = function() HUD.TogglePanel("Quests") end })
+	buttons.Traps = UIKit.IconButton({ Tooltip = TOOLTIPS.Traps, Image = Icons.Get("UI", "Traps"), Icon = "🛡️", Size = bsize, Color = Theme.Colors.Blue, LayoutOrder = 5, Parent = bottom, OnClick = function() HUD.TogglePanel("Traps") end })
+	buttons.Settings = UIKit.IconButton({ Tooltip = TOOLTIPS.Settings, Image = Icons.Get("UI", "Settings"), Icon = "⚙️", Size = bsize, Color = Theme.Colors.Grey, LayoutOrder = 6, Parent = bottom, OnClick = function() HUD.TogglePanel("Settings") end })
 
 	------------------------------------------------------------------ right: rebirth, quest tracker, rewards
 	local right = makeDock("Right", Vector2.new(1, 0.5), UDim2.new(1, -14, 0.5, 0), UDim2.new(0, 330, 0, 420))

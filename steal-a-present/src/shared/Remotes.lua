@@ -29,6 +29,7 @@ Remotes.Events = {
 	"SetSetting",        -- (key, value)
 	"PromptPurchase",    -- (kind, key)       kind = "Gamepass" | "Product"
 	"RedeemCode",        -- (code)
+	"Lift",              -- ()                one rep on the training bench
 	-- S->C
 	"DataChanged",       -- (partialProfile)  cheap fields the HUD shows
 	"UnwrapResult",      -- (presentRecord, boxTier)   -> unwrap popup for the owner

@@ -222,7 +222,9 @@ test("Medium box needs strength; training grants it; then buy works", function()
 	Engine.teleport(p1, pl.Bench.Position + Vector3.new(0, 3, 0))
 	Engine.trigger(pl.Bench.TrainPrompt, p1)
 	eq(Engine.humanoid(p1).WalkSpeed, 0, "frozen while training")
-	Sched.advance(16)
+	Sched.advance(5)
+	eq(profile(p1).Strength, 0, "no passive strength (anti-AFK)")
+	for _ = 1, 20 do Engine.fireServer(Remotes.Lift, p1) Sched.advance(0.5) end
 	truthy(profile(p1).Strength >= 15, "strength " .. profile(p1).Strength)
 	Engine.trigger(pl.Bench.TrainPrompt, p1)
 	eq(Engine.humanoid(p1).WalkSpeed, 16, "unfrozen")
@@ -490,10 +492,13 @@ test("Sleigh Drop spawns sacks that can be picked up and unwrapped", function()
 		if def.Key == "SleighDrop" then Events.StartEvent(def) end
 	end
 	truthy(Events.IsActive("SleighDrop"))
-	Sched.advance(12)
+	Sched.advance(0.5)
+	truthy(workspace.World.Hub:FindFirstChild("SantaSleigh"), "santa's sleigh flying")
+	Sched.advance(14)
+	truthy(not workspace.World.Hub:FindFirstChild("SantaSleigh"), "sleigh flew away")
 	local sacks = 0
 	for _, m in ipairs(workspace.World.Pickups:GetChildren()) do if m:GetAttribute("Tier") == "Sack" then sacks = sacks + 1 end end
-	eq(sacks, Config.Events.SleighDrop.SackCount, "sacks on the ground")
+	truthy(sacks >= Config.Events.SleighDrop.MinSacks and sacks <= Config.Events.SleighDrop.MaxSacks, "sacks on the ground: " .. sacks)
 	local sack
 	for _, m in ipairs(workspace.World.Pickups:GetChildren()) do if m:GetAttribute("Tier") == "Sack" then sack = m end end
 	truthy(sack.PrimaryPart.Position.Y > 0 and sack.PrimaryPart.Position.Y < 40, "resting on something, y=" .. sack.PrimaryPart.Position.Y)
@@ -696,7 +701,7 @@ test("world: environment, decoration, lock lamp and pedestal rims exist", functi
 	truthy(hub.Conveyor:FindFirstChild("Factory") and hub.Conveyor.Factory:FindFirstChild("Window"), "workshop windows")
 	local pl = plot(p1)
 	truthy(pl.LockLamp, "lock lamp wired")
-	truthy(pl.Model:FindFirstChild("House") and pl.Model:FindFirstChild("Fence") and pl.Model:FindFirstChild("GymSet"), "base decor")
+	truthy(pl.Model:FindFirstChild("House") and pl.Model:FindFirstChild("Fence") and pl.Model:FindFirstChild("LaunchPadModel"), "base decor")
 	truthy(pl.Slots[1]:FindFirstChild("Rim") and pl.Slots[1].Rim.Transparency == 0, "unlocked pedestal rim visible")
 	truthy(pl.Slots[20].Rim.Transparency == 1, "locked pedestal rim hidden")
 end)
@@ -1163,6 +1168,33 @@ test("belt boxes wear a wrapping texture once the texture id is configured", fun
 	truthy(wrapped.PrimaryPart:FindFirstChild("Wrap").Texture == "rbxassetid://777")
 	Icons.Textures.CandyCane = 0
 	plain:Destroy() wrapped:Destroy()
+end)
+
+test("client: hover tooltips explain base objects; LIFT button shows while training", function()
+	Engine.clientPlayer = p1
+	local Ctl = game:GetService("StarterPlayer").StarterPlayerScripts.Client.Controllers
+	local Hover = require(Ctl.HoverController)
+	Engine.mouse.Target = plot(p1).LaunchPad
+	Sched.advance(0.3)
+	truthy(Hover.Tip.Visible and Hover.Label.Text:find("Cannon"), "tooltip: " .. tostring(Hover.Label.Text))
+	Engine.mouse.Target = nil
+	Sched.advance(0.3)
+	truthy(not Hover.Tip.Visible, "tooltip hidden")
+	local Training = require(Ctl.TrainingController)
+	emptyHands(p1)
+	local pl = plot(p1)
+	Engine.teleport(p1, pl.Bench.Position + Vector3.new(0, 3, 0))
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	Sched.advance(0.3)
+	truthy(Training.Holder.Visible, "LIFT button visible")
+	local s0 = profile(p1).Strength
+	Sched.advance(0.6)
+	Training.Lift()
+	Sched.advance(0.2)
+	truthy(profile(p1).Strength > s0, "lift grants strength")
+	Engine.trigger(pl.Bench.TrainPrompt, p1)
+	Sched.advance(0.3)
+	truthy(not Training.Holder.Visible, "hidden after stopping")
 end)
 
 test("client: input bindings fire the right remotes", function()
