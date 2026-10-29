@@ -93,6 +93,10 @@ function HUD.SetBadge(buttonName, value)
 	if b then b.SetBadge(value) end
 end
 
+function HUD.GetButton(name)
+	return buttons[name]
+end
+
 ---------------------------------------------------------------------------
 -- Currency pills
 ---------------------------------------------------------------------------
@@ -330,6 +334,19 @@ local function tick()
 		end
 	end
 	updateBase(State.Base)
+	-- lock button shows the shield timer / cooldown
+	local base = State.Base
+	if base then
+		local locked = State.Remaining(base.LockUntil)
+		local cooldown = State.Remaining(base.CooldownUntil)
+		if locked > 0 then
+			buttons.Lock.SetLabel("🔒 " .. Util.FormatTime(locked))
+		elseif cooldown > 0 then
+			buttons.Lock.SetLabel("Lock in " .. Util.FormatTime(cooldown))
+		else
+			buttons.Lock.SetLabel("Lock Base")
+		end
+	end
 end
 
 function HUD.Wire()

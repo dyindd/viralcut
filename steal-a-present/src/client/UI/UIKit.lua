@@ -269,6 +269,10 @@ function UIKit.IconButton(props)
 		button.Activated:Connect(function() props.OnClick() end)
 	end
 	local api = { Frame = holder, Button = button }
+	function api.SetLabel(text)
+		local label = holder:FindFirstChild("Label")
+		if label then label.Text = text end
+	end
 	function api.SetBadge(value)
 		if value == nil or value == false or value == 0 then
 			badge.Visible = false

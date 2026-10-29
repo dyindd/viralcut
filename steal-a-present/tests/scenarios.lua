@@ -887,6 +887,29 @@ test("client: unwrap popup, carry card, toasts, grinch overlay react to remotes"
 	Sched.advance(Config.Grinch.Duration + 2)
 end)
 
+test("client: guide arrow points at the current objective and hides when done", function()
+	local Guide = require(game:GetService("StarterPlayer").StarterPlayerScripts.Client.Controllers.GuideController)
+	local State = require(game:GetService("StarterPlayer").StarterPlayerScripts.Client.State)
+	local snapshot = Data.Snapshot(p1)
+	snapshot.Tutorial = { Completed = {}, Finished = false }
+	State.Set("Profile", snapshot)
+	Sched.advance(0.5)
+	truthy(Guide.Marker.Visible, "marker shown for the Buy step")
+	truthy(Guide.Label.Text:find("box") and Guide.Label.Text:find("m"), "label: " .. Guide.Label.Text)
+	snapshot.Tutorial = { Completed = { Buy = true }, Finished = false }
+	State.Set("Profile", snapshot)
+	Sched.advance(0.5)
+	truthy(Guide.Label.Text:find("box"), "empty-handed: still points at the belt: " .. Guide.Label.Text)
+	State.Set("Carry", { Kind = "Box", Name = "Small Box" })
+	Sched.advance(0.5)
+	truthy(Guide.Label.Text:find("pad"), "carrying: points at the pad: " .. Guide.Label.Text)
+	State.Set("Carry", nil)
+	snapshot.Tutorial = { Completed = {}, Finished = true }
+	State.Set("Profile", snapshot)
+	Sched.advance(0.5)
+	truthy(not Guide.Marker.Visible, "hidden when finished")
+end)
+
 test("client: input bindings fire the right remotes", function()
 	Engine.clientPlayer = p1
 	emptyHands(p1)

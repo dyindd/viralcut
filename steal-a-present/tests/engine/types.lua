@@ -261,6 +261,11 @@ function typeof(v)
 	end
 	return "table"
 end
+-- Luau has these; Lua 5.4+ does not
+math.atan2 = math.atan2 or function(y, x) return math.atan(y, x) end
+math.pow = math.pow or function(a, b) return a ^ b end
+math.noise = math.noise or function() return 0 end
+unpack = unpack or table.unpack
 math.clamp = math.clamp or function(n, lo, hi) if n < lo then return lo elseif n > hi then return hi end return n end
 math.round = math.round or function(n) return math.floor(n + 0.5) end
 math.sign = math.sign or function(n) return n > 0 and 1 or n < 0 and -1 or 0 end

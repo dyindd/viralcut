@@ -57,6 +57,20 @@ workspace = Workspace
 Workspace._props.Gravity = 196.2
 local camera = newInstance("Camera") camera._props.Name = "Camera" camera.Parent = Workspace
 Workspace._props.CurrentCamera = camera
+-- pinhole projection so client guide arrows can be tested
+local function project(cam, pos)
+	local rel = cam._props.CFrame:Inverse() * pos
+	local depth = -rel.Z
+	local vp = cam._props.ViewportSize
+	local f = (vp.Y / 2) / math.tan(math.rad((cam._props.FieldOfView or 70) / 2))
+	local sx, sy
+	if math.abs(depth) < 1e-6 then sx, sy = vp.X / 2, vp.Y / 2 else sx = vp.X / 2 + rel.X / depth * f sy = vp.Y / 2 - rel.Y / depth * f end
+	local onScreen = depth > 0 and sx >= 0 and sx <= vp.X and sy >= 0 and sy <= vp.Y
+	return Vector3.new(sx, sy, depth), onScreen
+end
+camera._props.WorldToViewportPoint = function(self, pos) return project(self, pos) end
+camera._props.WorldToScreenPoint = function(self, pos) return project(self, pos) end
+camera._props.ViewportPointToRay = function(self, x, y) return { Origin = self._props.CFrame.Position, Direction = self._props.CFrame.LookVector } end
 Workspace._props.Terrain = newInstance("Terrain")
 
 function game.GetService(_, name)
