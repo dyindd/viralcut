@@ -33,7 +33,7 @@ function TrapsPanel.Create(HUD)
 		for _, c in ipairs(grid:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
 		for i, def in ipairs(Config.Traps.List) do
 			local card = UIKit.Card({ Size = UDim2.new(0, 250, 0, 230), LayoutOrder = i, StrokeColor = def.Color, Parent = grid })
-			UIKit.Text({ Text = def.Key == "IcePatch" and "🧊" or def.Key == "Mistletoe" and "🌿" or "🧝", Size = UDim2.new(1, 0, 0, 70), Position = UDim2.new(0, 0, 0, 6), TextSize = 54, Stroke = false, ZIndex = 14, Parent = card })
+			UIKit.Icon({ Category = "Traps", Key = def.Key, Fallback = def.Key == "IcePatch" and "🧊" or def.Key == "Mistletoe" and "🌿" or "🧝", Size = UDim2.new(0, 66, 0, 66), Position = UDim2.new(0.5, 0, 0, 8), AnchorPoint = Vector2.new(0.5, 0), TextSize = 54, ZIndex = 14, Parent = card })
 			UIKit.Text({ Text = def.Name, Size = UDim2.new(1, -10, 0, 32), Position = UDim2.new(0, 5, 0, 76), TextSize = 24, Scaled = true, MaxTextSize = 24, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 14, Parent = card })
 			UIKit.Text({ Text = def.Description, Size = UDim2.new(1, -16, 0, 50), Position = UDim2.new(0, 8, 0, 108), TextSize = 16, Scaled = true, MaxTextSize = 16, Wrapped = true, Color = Theme.Colors.TextMuted, Stroke = false, ZIndex = 14, Parent = card })
 			local placed = traps[tostring(selectedSocket)] == def.Key

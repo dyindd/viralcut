@@ -180,5 +180,18 @@ test("codes, tutorial, leaderboard and new events are well formed", function()
 	end
 end)
 
+test("Icons.lua lists every present, box tier, trap, pass and product", function()
+	local Icons = require(mock.folder("src/shared").Icons)
+	for _, p in ipairs(Catalog.Presents) do assert(Icons.Presents[p.Key] ~= nil, "missing icon slot for " .. p.Key) end
+	for _, t in ipairs(Config.BoxTiers) do assert(Icons.Boxes[t.Key] ~= nil, t.Key) end
+	for _, t in ipairs(Config.Traps.List) do assert(Icons.Traps[t.Key] ~= nil, t.Key) end
+	for k in pairs(Config.Monetization.Gamepasses) do assert(Icons.Passes[k] ~= nil, k) end
+	for k in pairs(Config.Monetization.Products) do assert(Icons.Products[k] ~= nil, k) end
+	assert(Icons.Get("Presents", "TeddyBear") == nil)
+	Icons.Presents.TeddyBear = 42
+	assert(Icons.Get("Presents", "TeddyBear") == "rbxassetid://42")
+	Icons.Presents.TeddyBear = 0
+end)
+
 print(string.format("%d passed, %d failed", passed, failed))
 if failed > 0 then error("tests failed") end

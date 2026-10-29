@@ -93,7 +93,11 @@ function IndexPanel.Create(HUD)
 				for i, p in ipairs(list) do
 					local unlocked = index[p.Key] == true
 					local card = UIKit.Card({ Size = UDim2.new(0, 140, 0, 140), LayoutOrder = i, Color = unlocked and Theme.Colors.Panel or Theme.Colors.Grey, StrokeColor = unlocked and r.Color or Theme.Colors.GreyDark, Parent = grid })
-					UIKit.Text({ Text = unlocked and p.Icon or "❔", Size = UDim2.new(1, 0, 0, 70), Position = UDim2.new(0, 0, 0, 6), TextSize = 54, Stroke = false, ZIndex = 14, Parent = card })
+					if unlocked then
+						UIKit.Icon({ Category = "Presents", Key = p.Key, Fallback = p.Icon, Size = UDim2.new(0, 66, 0, 66), Position = UDim2.new(0.5, 0, 0, 8), AnchorPoint = Vector2.new(0.5, 0), TextSize = 54, ZIndex = 14, Parent = card })
+					else
+						UIKit.Text({ Text = "❔", Size = UDim2.new(1, 0, 0, 70), Position = UDim2.new(0, 0, 0, 6), TextSize = 54, Stroke = false, ZIndex = 14, Parent = card })
+					end
 					UIKit.Text({ Text = unlocked and p.Name or "???", Size = UDim2.new(1, -8, 0, 30), Position = UDim2.new(0, 4, 0, 78), TextSize = 18, Scaled = true, MaxTextSize = 18, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 14, Parent = card })
 					UIKit.Text({ Text = unlocked and ("$" .. Util.FormatNumber(p.Income) .. "/s") or "", Size = UDim2.new(1, 0, 0, 24), Position = UDim2.new(0, 0, 0, 108), TextSize = 16, Color = Theme.Colors.GreenDark, Stroke = false, ZIndex = 14, Parent = card })
 				end

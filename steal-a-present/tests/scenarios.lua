@@ -1000,6 +1000,19 @@ test("client: presents bob/spin locally and training effects appear over trainer
 	truthy(not head:FindFirstChild("TrainFx"), "training billboard removed")
 end)
 
+test("client: icons fall back to emoji until an asset id is configured", function()
+	local UIKit = require(game:GetService("StarterPlayer").StarterPlayerScripts.Client.UI.UIKit)
+	local Icons = require(RS.Shared.Icons)
+	local holder = Instance.new("Frame")
+	local a = UIKit.Icon({ Category = "Presents", Key = "TeddyBear", Fallback = "🧸", Parent = holder })
+	truthy(a:IsA("TextLabel") and a.Text == "🧸", "emoji fallback")
+	Icons.Presents.TeddyBear = 123456
+	local b = UIKit.Icon({ Category = "Presents", Key = "TeddyBear", Fallback = "🧸", Parent = holder })
+	truthy(b:IsA("ImageLabel") and b.Image == "rbxassetid://123456", "image when configured")
+	Icons.Presents.TeddyBear = 0
+	truthy(UIKit.Icon({ Category = "Nope", Key = "x", Fallback = "?", Parent = holder }):IsA("TextLabel"), "unknown category is safe")
+end)
+
 test("client: input bindings fire the right remotes", function()
 	Engine.clientPlayer = p1
 	emptyHands(p1)

@@ -105,7 +105,7 @@ local function describe(carry)
 	end
 	local info = Catalog.PresentByKey[carry.Record.Key]
 	local rarity = Catalog.Rarities[carry.Record.Rarity]
-	return { Kind = "Present", Name = info and info.Name or carry.Record.Key, Rarity = carry.Record.Rarity,
+	return { Kind = "Present", Name = info and info.Name or carry.Record.Key, Key = carry.Record.Key, Icon = info and info.Icon, Rarity = carry.Record.Rarity,
 		Mutation = carry.Record.Mutation, Weight = rarity and rarity.Weight or 0, Color = rarity and rarity.Color, Stolen = carry.Stolen }
 end
 

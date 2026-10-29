@@ -12,6 +12,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Util = require(ReplicatedStorage.Shared.Util)
 local Seasons = require(ReplicatedStorage.Shared.Seasons)
 local Catalog = require(ReplicatedStorage.Shared.Catalog)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Theme = require(script.Parent.Theme)
 local UIKit = require(script.Parent.UIKit)
@@ -100,14 +101,14 @@ end
 ---------------------------------------------------------------------------
 -- Currency pills
 ---------------------------------------------------------------------------
-local function currencyPill(parent, icon, color, order)
+local function currencyPill(parent, icon, color, order, key)
 	local holder = UIKit.Create("Frame", { Size = UDim2.new(0, 260, 0, 58), BackgroundTransparency = 1, LayoutOrder = order, Parent = parent })
 	local circle = UIKit.Create("Frame", { Size = UDim2.new(0, 54, 0, 54), Position = UDim2.new(0, 0, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255), ZIndex = 3, Parent = holder })
 	UIKit.Corner(circle, 27)
 	UIKit.Stroke(circle, Theme.Stroke)
 	UIKit.Gradient(circle, color, UIKit.Darken(color, 0.7), 90)
-	UIKit.Text({ Text = icon, TextSize = 30, Stroke = false, ZIndex = 4, Parent = circle })
+	UIKit.Icon({ Category = "Currency", Key = key, Fallback = icon, TextSize = 30, Size = UDim2.new(0.78, 0, 0.78, 0), Position = UDim2.new(0.11, 0, 0.11, 0), ZIndex = 4, Parent = circle })
 	local value = UIKit.Text({ Text = "0", Size = UDim2.new(1, -66, 1, 0), Position = UDim2.new(0, 64, 0, 0), TextSize = 40,
 		XAlign = Enum.TextXAlignment.Left, StrokeThickness = 3, ZIndex = 3, Parent = holder })
 	return { Frame = holder, Value = value, Circle = circle }
@@ -133,9 +134,9 @@ function HUD.Build()
 	-- IgnoreGuiInset is on, so keep clear of Roblox's own top bar (~58px) ourselves
 	local topLeft = makeDock("TopLeft", Vector2.new(0, 0), UDim2.new(0, 14, 0, 66), UDim2.new(0, 290, 0, 360))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = topLeft })
-	HUD.CashPill = currencyPill(topLeft, "💵", Theme.Colors.Green, 1)
-	HUD.SnowPill = currencyPill(topLeft, "❄️", Theme.Colors.Cyan, 2)
-	HUD.StrengthPill = currencyPill(topLeft, "💪", Theme.Colors.Orange, 3)
+	HUD.CashPill = currencyPill(topLeft, "💵", Theme.Colors.Green, 1, "Cash")
+	HUD.SnowPill = currencyPill(topLeft, "❄️", Theme.Colors.Cyan, 2, "Snowflakes")
+	HUD.StrengthPill = currencyPill(topLeft, "💪", Theme.Colors.Orange, 3, "Strength")
 	HUD.StrengthPill.Value.TextSize = 30
 	-- base status line
 	local baseLine = UIKit.Create("Frame", { Size = UDim2.new(0, 270, 0, 34), BackgroundColor3 = Theme.Colors.Outline, BackgroundTransparency = 0.35, LayoutOrder = 4, Parent = topLeft })
@@ -154,10 +155,10 @@ function HUD.Build()
 	------------------------------------------------------------------ left column
 	local left = makeDock("Left", Vector2.new(0, 0.5), UDim2.new(0, 14, 0.5, 30), UDim2.new(0, 110, 0, 480))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 14), SortOrder = Enum.SortOrder.LayoutOrder, Parent = left })
-	buttons.Rewards = UIKit.IconButton({ Icon = "🎁", Label = "Rewards", Color = Theme.Colors.Pink, LayoutOrder = 1, Parent = left, OnClick = function() HUD.TogglePanel("Rewards") end })
-	buttons.Rebirth = UIKit.IconButton({ Icon = "🔄", Label = "Rebirth", Color = Theme.Colors.Purple, LayoutOrder = 2, Parent = left, OnClick = function() HUD.TogglePanel("Rebirth") end })
-	buttons.Gift = UIKit.IconButton({ Icon = "💝", Label = "Gift", Color = Theme.Colors.Red, LayoutOrder = 3, Parent = left, OnClick = function() HUD.TogglePanel("Gift") end })
-	buttons.Lock = UIKit.IconButton({ Icon = "🔒", Label = "Lock Base", Color = Theme.Colors.Blue, LayoutOrder = 4, Parent = left, OnClick = function() Remotes.Get("LockBase"):FireServer() end })
+	buttons.Rewards = UIKit.IconButton({ Image = Icons.Get("UI", "Rewards"), Icon = "🎁", Label = "Rewards", Color = Theme.Colors.Pink, LayoutOrder = 1, Parent = left, OnClick = function() HUD.TogglePanel("Rewards") end })
+	buttons.Rebirth = UIKit.IconButton({ Image = Icons.Get("UI", "Rebirth"), Icon = "🔄", Label = "Rebirth", Color = Theme.Colors.Purple, LayoutOrder = 2, Parent = left, OnClick = function() HUD.TogglePanel("Rebirth") end })
+	buttons.Gift = UIKit.IconButton({ Image = Icons.Get("UI", "Gift"), Icon = "💝", Label = "Gift", Color = Theme.Colors.Red, LayoutOrder = 3, Parent = left, OnClick = function() HUD.TogglePanel("Gift") end })
+	buttons.Lock = UIKit.IconButton({ Image = Icons.Get("UI", "Lock"), Icon = "🔒", Label = "Lock Base", Color = Theme.Colors.Blue, LayoutOrder = 4, Parent = left, OnClick = function() Remotes.Get("LockBase"):FireServer() end })
 
 	------------------------------------------------------------------ bottom bar
 	-- sits ABOVE the Roblox tool hotbar (bat / snowball) instead of covering it
@@ -165,12 +166,12 @@ function HUD.Build()
 	UIKit.Create("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center,
 		VerticalAlignment = Enum.VerticalAlignment.Bottom, SortOrder = Enum.SortOrder.LayoutOrder, Parent = bottom })
 	local bsize = Theme.BottomButton
-	buttons.Base = UIKit.IconButton({ Icon = "📦", Size = bsize, Color = Theme.Colors.Yellow, LayoutOrder = 1, Parent = bottom, OnClick = function() HUD.TogglePanel("Base") end })
-	buttons.Shop = UIKit.IconButton({ Icon = "🛒", Size = bsize, Color = Theme.Colors.Red, LayoutOrder = 2, Parent = bottom, OnClick = function() HUD.TogglePanel("Shop") end })
-	buttons.Index = UIKit.IconButton({ Icon = "📖", Size = bsize, Color = Theme.Colors.Orange, LayoutOrder = 3, Parent = bottom, OnClick = function() HUD.TogglePanel("Index") end })
-	buttons.Quests = UIKit.IconButton({ Icon = "⭐", Size = bsize, Color = Theme.Colors.Pink, LayoutOrder = 4, Parent = bottom, OnClick = function() HUD.TogglePanel("Quests") end })
-	buttons.Traps = UIKit.IconButton({ Icon = "🛡️", Size = bsize, Color = Theme.Colors.Blue, LayoutOrder = 5, Parent = bottom, OnClick = function() HUD.TogglePanel("Traps") end })
-	buttons.Settings = UIKit.IconButton({ Icon = "⚙️", Size = bsize, Color = Theme.Colors.Grey, LayoutOrder = 6, Parent = bottom, OnClick = function() HUD.TogglePanel("Settings") end })
+	buttons.Base = UIKit.IconButton({ Image = Icons.Get("UI", "Base"), Icon = "📦", Size = bsize, Color = Theme.Colors.Yellow, LayoutOrder = 1, Parent = bottom, OnClick = function() HUD.TogglePanel("Base") end })
+	buttons.Shop = UIKit.IconButton({ Image = Icons.Get("UI", "Shop"), Icon = "🛒", Size = bsize, Color = Theme.Colors.Red, LayoutOrder = 2, Parent = bottom, OnClick = function() HUD.TogglePanel("Shop") end })
+	buttons.Index = UIKit.IconButton({ Image = Icons.Get("UI", "Index"), Icon = "📖", Size = bsize, Color = Theme.Colors.Orange, LayoutOrder = 3, Parent = bottom, OnClick = function() HUD.TogglePanel("Index") end })
+	buttons.Quests = UIKit.IconButton({ Image = Icons.Get("UI", "Quests"), Icon = "⭐", Size = bsize, Color = Theme.Colors.Pink, LayoutOrder = 4, Parent = bottom, OnClick = function() HUD.TogglePanel("Quests") end })
+	buttons.Traps = UIKit.IconButton({ Image = Icons.Get("UI", "Traps"), Icon = "🛡️", Size = bsize, Color = Theme.Colors.Blue, LayoutOrder = 5, Parent = bottom, OnClick = function() HUD.TogglePanel("Traps") end })
+	buttons.Settings = UIKit.IconButton({ Image = Icons.Get("UI", "Settings"), Icon = "⚙️", Size = bsize, Color = Theme.Colors.Grey, LayoutOrder = 6, Parent = bottom, OnClick = function() HUD.TogglePanel("Settings") end })
 
 	------------------------------------------------------------------ right: rebirth, quest tracker, rewards
 	local right = makeDock("Right", Vector2.new(1, 0.5), UDim2.new(1, -14, 0.5, 0), UDim2.new(0, 330, 0, 420))
@@ -209,7 +210,7 @@ function HUD.Build()
 	HUD.CarryIcon = UIKit.Create("Frame", { Size = UDim2.new(0, 60, 0, 60), Position = UDim2.new(0, 12, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), BackgroundColor3 = Theme.Colors.Red, ZIndex = 4, Parent = card })
 	UIKit.Corner(HUD.CarryIcon, 14)
 	UIKit.Stroke(HUD.CarryIcon, Theme.StrokeThin)
-	UIKit.Text({ Text = "🎁", TextSize = 34, Stroke = false, ZIndex = 5, Parent = HUD.CarryIcon })
+	HUD.CarryIconInner = UIKit.Icon({ Category = "Boxes", Key = "Small", Fallback = "🎁", TextSize = 34, Size = UDim2.new(0.8, 0, 0.8, 0), Position = UDim2.new(0.1, 0, 0.1, 0), ZIndex = 5, Parent = HUD.CarryIcon })
 	HUD.CarryTitle = UIKit.Text({ Text = "", Size = UDim2.new(1, -230, 0, 36), Position = UDim2.new(0, 84, 0, 8), TextSize = 26, Scaled = true, MaxTextSize = 26, XAlign = Enum.TextXAlignment.Left, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 4, Parent = card })
 	HUD.CarrySub = UIKit.Text({ Text = "", Size = UDim2.new(1, -230, 0, 26), Position = UDim2.new(0, 84, 0, 46), TextSize = 20, Scaled = true, MaxTextSize = 20, XAlign = Enum.TextXAlignment.Left, Color = Theme.Colors.TextMuted, Stroke = false, ZIndex = 4, Parent = card })
 	UIKit.Button({ Text = "DROP", Color = Theme.Colors.Red, Size = UDim2.new(0, 120, 0, 56), Position = UDim2.new(1, -12, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), TextSize = 26, ZIndex = 4, Parent = card,
@@ -287,6 +288,12 @@ local function updateCarry(info)
 	HUD.CarryCard.Visible = info ~= nil
 	if not info then return end
 	HUD.CarryIcon.BackgroundColor3 = info.Color or Theme.Colors.Red
+	if HUD.CarryIconInner then HUD.CarryIconInner:Destroy() end
+	HUD.CarryIconInner = UIKit.Icon({
+		Category = info.Kind == "Box" and "Boxes" or "Presents", Key = info.Kind == "Box" and info.Tier or info.Key,
+		Fallback = info.Kind == "Box" and "🎁" or (info.Icon or "🎁"), TextSize = 34,
+		Size = UDim2.new(0.8, 0, 0.8, 0), Position = UDim2.new(0.1, 0, 0.1, 0), ZIndex = 5, Parent = HUD.CarryIcon,
+	})
 	if info.Kind == "Box" then
 		HUD.CarryTitle.Text = "Carrying: " .. info.Name
 		HUD.CarrySub.Text = "Bring it to the green pad at YOUR base to unwrap it!"

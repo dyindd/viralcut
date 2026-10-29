@@ -47,7 +47,7 @@ function BasePanel.Create(HUD)
 			local info = Catalog.PresentByKey[record.Key] or { Name = record.Key, Icon = "🎁" }
 			local r = Catalog.Rarities[record.Rarity] or Catalog.Rarities.Common
 			local card = UIKit.Card({ Size = UDim2.new(1, -16, 0, 80), LayoutOrder = i, StrokeColor = r.Color, Parent = list })
-			UIKit.Text({ Text = info.Icon, Size = UDim2.new(0, 60, 1, 0), Position = UDim2.new(0, 8, 0, 0), TextSize = 40, Stroke = false, ZIndex = 14, Parent = card })
+			UIKit.Icon({ Category = "Presents", Key = record.Key, Fallback = info.Icon, Size = UDim2.new(0, 56, 0, 56), Position = UDim2.new(0, 10, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), TextSize = 40, ZIndex = 14, Parent = card })
 			local traits = ""
 			for k in pairs(record.Traits or {}) do
 				local t = Catalog.Traits[k]

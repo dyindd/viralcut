@@ -4,7 +4,9 @@
 ]]
 
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Theme = require(script.Parent.Theme)
+local Icons = require(ReplicatedStorage.Shared.Icons)
 
 local UIKit = {}
 UIKit.PanelScale = 1   -- set by HUD.UpdateScale so modals fit on phones
@@ -158,6 +160,30 @@ function UIKit.GlowStroke(obj, color, thickness)
 		Rotation = 45, Parent = stroke,
 	})
 	return stroke
+end
+
+-- An icon: ImageLabel when an asset id is configured in Icons.lua, otherwise the emoji fallback.
+-- props: Category, Key, Fallback, Size, Position, AnchorPoint, ZIndex, TextSize, Parent
+function UIKit.Icon(props)
+	local image = Icons.Get(props.Category, props.Key)
+	if image then
+		return UIKit.Create("ImageLabel", {
+			Name = props.Name or "Icon",
+			Size = props.Size or UDim2.new(1, 0, 1, 0),
+			Position = props.Position or UDim2.new(0, 0, 0, 0),
+			AnchorPoint = props.AnchorPoint or Vector2.new(0, 0),
+			BackgroundTransparency = 1,
+			Image = image,
+			ScaleType = Enum.ScaleType.Fit,
+			ZIndex = props.ZIndex or 1,
+			LayoutOrder = props.LayoutOrder or 0,
+			Parent = props.Parent,
+		})
+	end
+	return UIKit.Text({
+		Name = props.Name or "Icon", Text = props.Fallback or "❔", Size = props.Size or UDim2.new(1, 0, 1, 0), Position = props.Position,
+		AnchorPoint = props.AnchorPoint, TextSize = props.TextSize or 40, Stroke = false, ZIndex = props.ZIndex or 1, LayoutOrder = props.LayoutOrder, Parent = props.Parent,
+	})
 end
 
 ---------------------------------------------------------------------------
