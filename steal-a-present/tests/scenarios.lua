@@ -1013,6 +1013,21 @@ test("client: icons fall back to emoji until an asset id is configured", functio
 	truthy(UIKit.Icon({ Category = "Nope", Key = "x", Fallback = "?", Parent = holder }):IsA("TextLabel"), "unknown category is safe")
 end)
 
+test("belt boxes wear a wrapping texture once the texture id is configured", function()
+	local Icons = require(RS.Shared.Icons)
+	local PresentModels = require(RS.Shared.PresentModels)
+	local plain = PresentModels.MakeBox("Small")
+	eq(#plain.PrimaryPart:GetChildren(), 0, "no texture without an id")
+	Icons.Textures.CandyCane = 777
+	local wrapped = PresentModels.MakeBox("Small")
+	local textures = 0
+	for _, c in ipairs(wrapped.PrimaryPart:GetChildren()) do if c:IsA("Texture") then textures = textures + 1 end end
+	eq(textures, 6, "six faces textured")
+	truthy(wrapped.PrimaryPart:FindFirstChild("Wrap").Texture == "rbxassetid://777")
+	Icons.Textures.CandyCane = 0
+	plain:Destroy() wrapped:Destroy()
+end)
+
 test("client: input bindings fire the right remotes", function()
 	Engine.clientPlayer = p1
 	emptyHands(p1)

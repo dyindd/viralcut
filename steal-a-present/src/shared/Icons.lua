@@ -128,6 +128,16 @@ Icons.Presents = {
 	CupidHimself = 0,
 }
 
+-- seamless wrapping-paper textures (wrapping_*.png); applied to belt boxes when set
+Icons.Textures = {
+	CandyCane = 0,
+	Hearts = 0,
+	PolkaDots = 0,
+	Snowflakes = 0,
+}
+-- which pattern each box tier wears (nil = plain color)
+Icons.BoxWrap = { Small = "CandyCane", Medium = "Snowflakes", Large = "PolkaDots", Huge = "Hearts", Giant = "PolkaDots", Gift = "Hearts" }
+
 function Icons.Get(category, key)
 	local group = Icons[category]
 	local id = group and group[key]

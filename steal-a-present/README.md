@@ -169,8 +169,12 @@ python3 tests/econ_sim.py
 * The padlock lamp on every base turns green while locked, red when open.
 * UI: shine sweeps on buttons, spinning light rays behind the unwrap reveal, floating "+$x" pops, a rainbow outline on Rewards while something is claimable, gradient panel bodies and titles.
 
-## 7. What's stubbed or placeholder
-* **Art**: boxes, presents and traps are generated Parts. Drop models into `ReplicatedStorage.Models.*` to replace them (see `docs/STUDIO_CHECKLIST.md`). Icons are emoji until you add images.
+## 7. Art assets (`assets/`)
+* `assets/images/` — 88 finished icons (512px PNG, transparent): UI buttons, currencies, box tiers, traps, mutation badges, gamepasses, products, all 46 presents.
+* `assets/marketing/` — game icon (two variants) and three 1920x1080 thumbnails for the Creator Dashboard.
+* `assets/textures/` — four seamless wrapping papers that the belt boxes wear once uploaded.
+* Upload everything and fill the ids automatically: `python3 tools/upload_to_roblox.py --user <your id>` (needs an Open Cloud API key, see the file header). Or bulk-import in Studio and paste ids into `src/shared/Icons.lua` by hand. Until an id is set the UI shows the emoji fallback.
+* 3D models (presents on pedestals, boxes, traps) are still generated Parts; drop meshes into `ReplicatedStorage.Models.*` to replace them.
 * **Sounds**: `Config.Sounds` has library IDs that may be silent/moderated; replace with your own.
 * **Icons**: UI uses emoji; `UIKit.IconButton` takes an `Image` to swap.
 * **Base lock** is enforced by the server (steals are refused), not by a physical wall — simpler and exploit-proof, but thieves can still walk through a locked base.

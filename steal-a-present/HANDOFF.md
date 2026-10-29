@@ -43,6 +43,10 @@ CONVENTIONS (keep them)
 - Work in this chat directly; don't spawn subagents or workflows (they cost too much).
 - Commit to the branch above; never push to main.
 
+ART
+- assets/images (88 icons), assets/marketing (icon + thumbnails), assets/textures (wrapping paper) are DONE.
+- Upload them with tools/upload_to_roblox.py (Open Cloud API key) or Studio bulk import; ids go in src/shared/Icons.lua.
+
 NEXT STEPS
 1. Open in Roblox Studio via Rojo (README section 1), press Play, fix anything red in the output.
 2. Test with 2 clients (stealing, Grinch, gifting).

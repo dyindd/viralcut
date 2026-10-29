@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(script.Parent.Config)
 local Catalog = require(script.Parent.Catalog)
+local Icons = require(script.Parent.Icons)
 
 local PresentModels = {}
 
@@ -58,6 +59,23 @@ function PresentModels.GetTier(tierKey)
 	return Config.BoxTiers[1]
 end
 
+-- Wrapping-paper texture on every face of a box body (only when the texture id is configured in Icons.lua)
+local FACES = { Enum.NormalId.Top, Enum.NormalId.Bottom, Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }
+function PresentModels.ApplyWrap(body, tierKey)
+	local pattern = Icons.BoxWrap[tierKey]
+	local image = pattern and Icons.Get("Textures", pattern)
+	if not image or not body then return end
+	for _, face in ipairs(FACES) do
+		local t = Instance.new("Texture")
+		t.Name = "Wrap"
+		t.Texture = image
+		t.Face = face
+		t.StudsPerTileU = body.Size.X
+		t.StudsPerTileV = body.Size.Y
+		t.Parent = body
+	end
+end
+
 -- A wrapped box. Returns a Model whose PrimaryPart is the box body.
 function PresentModels.MakeBox(tierKey)
 	local tier = PresentModels.GetTier(tierKey)
@@ -72,6 +90,7 @@ function PresentModels.MakeBox(tierKey)
 	local s = tier.Size
 	local body = makePart("Body", Vector3.new(s, s, s), tier.Color, Enum.Material.SmoothPlastic, model)
 	model.PrimaryPart = body
+	PresentModels.ApplyWrap(body, tier.Key)
 
 	-- ribbon (two thin bands crossing the box)
 	local ribbonColor = Color3.fromRGB(255, 240, 120)
