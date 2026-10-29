@@ -127,6 +127,45 @@ local function buildHub(world)
 	tree.PrimaryPart = trunk
 	label(star, "SEASON", 1, Color3.fromRGB(255, 240, 150), 4).Name = "SeasonLabel"
 
+	-- global leaderboards (two boards flanking the spawn, facing it)
+	local boards = Instance.new("Model")
+	boards.Name = "Leaderboards"
+	boards.Parent = hub
+	for i, def in ipairs(Config.Leaderboard.Boards) do
+		local x = (i == 1) and -22 or 22
+		local board = part({ Name = def.Key .. "Board", Size = Vector3.new(16, 14, 1), CFrame = CFrame.new(x, 8, 48) * CFrame.Angles(0, math.rad(180), 0),
+			Color = Color3.fromRGB(40, 40, 60), Material = Enum.Material.SmoothPlastic, Parent = boards })
+		local gui = Instance.new("SurfaceGui")
+		gui.Name = "BoardGui"
+		gui.Face = Enum.NormalId.Front
+		gui.CanvasSize = Vector2.new(640, 560)
+		gui.Parent = board
+		local title = Instance.new("TextLabel")
+		title.Name = "Title"
+		title.BackgroundTransparency = 1
+		title.Size = UDim2.new(1, 0, 0, 70)
+		title.Font = Enum.Font.FredokaOne
+		title.TextSize = 52
+		title.TextColor3 = Color3.fromRGB(255, 220, 80)
+		title.TextStrokeTransparency = 0
+		title.Text = def.Title
+		title.Parent = gui
+		for row = 1, Config.Leaderboard.Top do
+			local tl = Instance.new("TextLabel")
+			tl.Name = "Row" .. row
+			tl.BackgroundTransparency = 1
+			tl.Position = UDim2.new(0, 20, 0, 70 + (row - 1) * 46)
+			tl.Size = UDim2.new(1, -40, 0, 44)
+			tl.Font = Enum.Font.FredokaOne
+			tl.TextSize = 34
+			tl.TextXAlignment = Enum.TextXAlignment.Left
+			tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+			tl.TextStrokeTransparency = 0.3
+			tl.Text = row .. ".  ---"
+			tl.Parent = gui
+		end
+	end
+
 	-- candy cane poles
 	for i = 0, 11 do
 		local a = i / 12 * math.pi * 2

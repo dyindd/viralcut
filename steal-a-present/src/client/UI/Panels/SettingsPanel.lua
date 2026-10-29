@@ -9,7 +9,7 @@ local State = require(script.Parent.Parent.Parent.State)
 local SettingsPanel = {}
 
 function SettingsPanel.Create(HUD)
-	local panel = UIKit.Panel({ Name = "Settings", Title = "Settings", Icon = "⚙️", Width = 620, Height = 440, Parent = HUD.Layers.Panels })
+	local panel = UIKit.Panel({ Name = "Settings", Title = "Settings & Codes", Icon = "⚙️", Width = 640, Height = 520, Parent = HUD.Layers.Panels })
 	local list = UIKit.Create("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Parent = panel.Content })
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 12), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Parent = list })
 
@@ -34,6 +34,18 @@ function SettingsPanel.Create(HUD)
 	end
 	toggleRow("Music", "🎵 Music", 1)
 	toggleRow("SFX", "🔊 Sound Effects", 2)
+	-- redeem code
+	local codeRow = UIKit.Card({ Size = UDim2.new(1, -16, 0, 64), LayoutOrder = 0, Parent = list })
+	UIKit.Text({ Text = "🎟️ Code", Size = UDim2.new(0, 110, 1, 0), Position = UDim2.new(0, 16, 0, 0), TextSize = 26, XAlign = Enum.TextXAlignment.Left, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 14, Parent = codeRow })
+	local input = UIKit.TextBox({ Placeholder = "ENTER CODE", Size = UDim2.new(0, 250, 0, 46), Position = UDim2.new(0, 130, 0.5, 0), AnchorPoint = Vector2.new(0, 0.5), Parent = codeRow })
+	UIKit.Button({ Text = "REDEEM", Color = Theme.Colors.Pink, Size = UDim2.new(0, 150, 0, 46), Position = UDim2.new(1, -12, 0.5, 0), AnchorPoint = Vector2.new(1, 0.5), TextSize = 22, ZIndex = 14, Parent = codeRow,
+		OnClick = function()
+			local code = input.Text
+			if code and #code > 0 then
+				Remotes.Get("RedeemCode"):FireServer(code)
+				input.Text = ""
+			end
+		end })
 	local help = UIKit.Card({ Size = UDim2.new(1, -16, 0, 170), LayoutOrder = 3, Parent = list })
 	UIKit.Text({ Text = "CONTROLS\nE / tap prompt = buy, pick up, steal, train\nQ = drop what you're carrying   ·   L = lock your base\nClick = swing your Candy Cane Bat (knocks thieves!)\nDuring Grinch Mode: equip the Snowball and click to throw",
 		Size = UDim2.new(1, -20, 1, -10), Position = UDim2.new(0, 10, 0, 5), TextSize = 18, Wrapped = true, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 14, Parent = help })

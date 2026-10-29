@@ -67,6 +67,7 @@ local function tryTake(player, tierKey, model, price)
 	if price > 0 then
 		profile.Stats.Bought = (profile.Stats.Bought or 0) + 1
 		Registry.Get("QuestService").Progress(player, "Buy", 1)
+		Registry.Get("TutorialService").Complete(player, "Buy")
 	end
 	return true
 end

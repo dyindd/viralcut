@@ -30,7 +30,37 @@ end
 local function Data() return Registry.Get("DataService") end
 local function Notify() return Registry.Get("NotifyService") end
 
+function MonetizationService.ApplyVIPTag(player)
+	local char = player.Character
+	if not char then return end
+	local existing = char:FindFirstChild("VIPTag")
+	if not Data().HasGamepass(player, "VIP") then
+		if existing then existing:Destroy() end
+		return
+	end
+	if existing then return end
+	local head = char:FindFirstChild("Head") or char.PrimaryPart
+	if not head then return end
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "VIPTag"
+	bb.Size = UDim2.new(0, 120, 0, 36)
+	bb.StudsOffset = Vector3.new(0, 2.6, 0)
+	bb.AlwaysOnTop = true
+	bb.Adornee = head
+	bb.Parent = char
+	local tl = Instance.new("TextLabel")
+	tl.BackgroundTransparency = 1
+	tl.Size = UDim2.new(1, 0, 1, 0)
+	tl.Font = Enum.Font.FredokaOne
+	tl.TextScaled = true
+	tl.Text = "👑 VIP"
+	tl.TextColor3 = Color3.fromRGB(255, 215, 0)
+	tl.TextStrokeTransparency = 0
+	tl.Parent = bb
+end
+
 local function applyPassEffects(player)
+	MonetizationService.ApplyVIPTag(player)
 	local plot = Registry.Get("PlotService").GetPlot(player)
 	if plot then
 		Registry.Get("PlotService").RefreshSlots(plot)
@@ -163,6 +193,15 @@ function MonetizationService.Init()
 	end)
 end
 
-function MonetizationService.Start() end
+function MonetizationService.Start()
+	local function hook(player)
+		player.CharacterAdded:Connect(function()
+			task.wait(0.3)
+			MonetizationService.ApplyVIPTag(player)
+		end)
+	end
+	Players.PlayerAdded:Connect(hook)
+	for _, player in ipairs(Players:GetPlayers()) do hook(player) end
+end
 
 return MonetizationService

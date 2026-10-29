@@ -45,6 +45,7 @@ function StrengthService.Toggle(player, plot)
 	end
 	if not Validate.Near(player, plot.Bench, 10) then return end
 	training[player] = plot
+	Registry.Get("TutorialService").Complete(player, "Train")
 	Registry.Get("CarryService").SetSpeedModifier(player, "Training", 0)
 	Notify().Notify(player, "Training! +" .. Util.FormatNumber(StrengthService.GetGainPerSecond(player)) .. " Strength/s. Press the bench again to stop.", "success")
 end

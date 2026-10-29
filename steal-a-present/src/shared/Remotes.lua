@@ -28,6 +28,7 @@ Remotes.Events = {
 	"SellPresent",       -- (presentId)       sell a present at your base for cash
 	"SetSetting",        -- (key, value)
 	"PromptPurchase",    -- (kind, key)       kind = "Gamepass" | "Product"
+	"RedeemCode",        -- (code)
 	-- S->C
 	"DataChanged",       -- (partialProfile)  cheap fields the HUD shows
 	"UnwrapResult",      -- (presentRecord, boxTier)   -> unwrap popup for the owner

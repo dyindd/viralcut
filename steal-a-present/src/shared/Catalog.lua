@@ -83,6 +83,24 @@ Catalog.Presents = {
 	-- Secret
 	{ Key = "SantasSleigh",   Name = "Santa's Sleigh",     Rarity = "Secret",    Income = 3000, Icon = "🛷", Set = "Christmas" },
 	{ Key = "GrinchHeart",    Name = "The Grinch's Heart", Rarity = "Secret",    Income = 5000, Icon = "💚", Set = "Classic" },
+
+	-- New Year's set (drops Jan 2 -> Feb 1, see Catalog.Seasons)
+	{ Key = "PartyPopper",    Name = "Party Popper",       Rarity = "Common",    Income = 2,     Icon = "🎉", Set = "NewYear" },
+	{ Key = "DiscoBall",      Name = "Disco Ball",         Rarity = "Uncommon",  Income = 5,     Icon = "🪩", Set = "NewYear" },
+	{ Key = "ChampagneTower", Name = "Champagne Tower",    Rarity = "Rare",      Income = 11,    Icon = "🥂", Set = "NewYear" },
+	{ Key = "CountdownClock", Name = "Countdown Clock",    Rarity = "Epic",      Income = 35,    Icon = "⏰", Set = "NewYear" },
+	{ Key = "GoldenFireworks",Name = "Golden Fireworks",   Rarity = "Legendary", Income = 130,   Icon = "🎆", Set = "NewYear" },
+	{ Key = "TimeCapsule",    Name = "Time Capsule",       Rarity = "Mythic",    Income = 600,   Icon = "🕰️", Set = "NewYear" },
+	{ Key = "BallDrop",       Name = "The Ball Drop",      Rarity = "Secret",    Income = 4000,  Icon = "🔮", Set = "NewYear" },
+
+	-- Valentine's set (drops Feb 1 -> Mar 1)
+	{ Key = "LoveLetter",     Name = "Love Letter",        Rarity = "Common",    Income = 2,     Icon = "💌", Set = "Valentines" },
+	{ Key = "ChocolateBox",   Name = "Chocolate Box",      Rarity = "Uncommon",  Income = 5,     Icon = "🍫", Set = "Valentines" },
+	{ Key = "HeartTeddy",     Name = "Teddy with Heart",   Rarity = "Rare",      Income = 11,    Icon = "🧸", Set = "Valentines" },
+	{ Key = "CupidsBow",      Name = "Cupid's Bow",        Rarity = "Epic",      Income = 35,    Icon = "🏹", Set = "Valentines" },
+	{ Key = "DiamondRing",    Name = "Diamond Ring",       Rarity = "Legendary", Income = 140,   Icon = "💍", Set = "Valentines" },
+	{ Key = "HeartOfGold",    Name = "Heart of Gold",      Rarity = "Mythic",    Income = 650,   Icon = "💛", Set = "Valentines" },
+	{ Key = "CupidHimself",   Name = "Cupid Himself",      Rarity = "Secret",    Income = 4500,  Icon = "👼", Set = "Valentines" },
 }
 
 -- Fast lookups (built once)
@@ -138,6 +156,15 @@ Catalog.Quests = {
 	{ Id = "train100",    Text = "Gain 100 Strength",                Stat = "Train",      Goal = 100,   Reward = { Cash = 2000,  Snowflakes = 6 } },
 	{ Id = "gift1",       Text = "Gift a present to someone",        Stat = "Gift",       Goal = 1,     Reward = { Cash = 2000,  Snowflakes = 10 } },
 	{ Id = "lock3",       Text = "Lock your base 3 times",           Stat = "Lock",       Goal = 3,     Reward = { Cash = 800,   Snowflakes = 4 } },
+	{ Id = "unwrap25",    Text = "Unwrap 25 presents",               Stat = "Unwrap",     Goal = 25,    Reward = { Cash = 4000,  Snowflakes = 12 } },
+	{ Id = "epic3",       Text = "Unwrap 3 Epic or better",          Stat = "UnwrapEpic", Goal = 3,     Reward = { Cash = 12000, Snowflakes = 20 } },
+	{ Id = "steal5",      Text = "Steal 5 presents",                 Stat = "Steal",      Goal = 5,     Reward = { Cash = 5000,  Snowflakes = 14 } },
+	{ Id = "hit10",       Text = "Whack 10 thieves",                 Stat = "Hit",        Goal = 10,    Reward = { Cash = 4000,  Snowflakes = 12 } },
+	{ Id = "grinch3",     Text = "Hit the Grinch 3 times",           Stat = "GrinchTag",  Goal = 3,     Reward = { Cash = 8000,  Snowflakes = 20 } },
+	{ Id = "collect25k",  Text = "Collect $25,000 from your base",   Stat = "Collect",    Goal = 25000, Reward = { Cash = 6000,  Snowflakes = 12 } },
+	{ Id = "train300",    Text = "Gain 300 Strength",                Stat = "Train",      Goal = 300,   Reward = { Cash = 6000,  Snowflakes = 14 } },
+	{ Id = "gift2",       Text = "Gift 2 presents to other players", Stat = "Gift",       Goal = 2,     Reward = { Cash = 5000,  Snowflakes = 16 } },
+	{ Id = "lock5",       Text = "Lock your base 5 times",           Stat = "Lock",       Goal = 5,     Reward = { Cash = 1500,  Snowflakes = 6 } },
 }
 
 ---------------------------------------------------------------------------

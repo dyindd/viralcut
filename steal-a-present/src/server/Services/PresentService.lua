@@ -42,6 +42,7 @@ function PresentService.GetMultipliers(player, profile)
 	if Data().HasGamepass(player, "VIP") then
 		mult = mult * Config.Monetization.VIPCashMultiplier
 	end
+	mult = mult * Events().GetIncomeMultiplier()
 	return mult
 end
 
@@ -95,7 +96,7 @@ function PresentService.RollMutation()
 	local total = 0
 	for _, key in ipairs(Catalog.MutationOrder) do
 		local m = Catalog.Mutations[key]
-		local chance = m.Chance
+		local chance = m.Chance * Events().GetMutationChanceMultiplier()
 		if m.EventBoost and Events().IsActive(m.EventBoost) then
 			chance = chance * Config.Events.MutationBoost
 		end
@@ -193,6 +194,13 @@ function PresentService.RecalcIncome(plot)
 	plot.IncomePerSec = total
 	Plots().UpdateSign(plot)
 	Plots().SendBaseState(owner)
+end
+
+-- Recompute every base's income (events start/end, global multipliers)
+function PresentService.RecalcAll()
+	for _, plot in ipairs(Plots().AllPlots()) do
+		if plot.Owner then PresentService.RecalcIncome(plot) end
+	end
 end
 
 function PresentService.FindRecord(profile, presentId)
@@ -324,6 +332,7 @@ local function unwrapBox(player, plot, profile, carry)
 	local tierNum = rarityTier[rarityKey]
 	if tierNum > (profile.Stats.BestRarity or 0) then profile.Stats.BestRarity = tierNum end
 	Quests().Progress(player, "Unwrap", 1)
+	Registry.Get("TutorialService").Complete(player, "Unwrap")
 	if tierNum >= 4 then Quests().Progress(player, "UnwrapRare", 1) end
 	if tierNum >= 5 then Quests().Progress(player, "UnwrapEpic", 1) end
 	Registry.Get("IndexService").Unlock(player, info.Key)
@@ -358,6 +367,7 @@ local function placeStolen(player, plot, profile, carry)
 		if carry.GrinchLoot then record.Traits.Grinch = true end
 		profile.Stats.Stolen = (profile.Stats.Stolen or 0) + 1
 		Quests().Progress(player, "Steal", 1)
+		Registry.Get("TutorialService").Complete(player, "Steal")
 	end
 	Registry.Get("StealService").OnDeposited(player, carry)
 	table.insert(profile.Presents, record)
@@ -376,10 +386,25 @@ local function placeStolen(player, plot, profile, carry)
 	Data().Replicate(player)
 end
 
+-- A deposit that implies travelling faster than Config.AntiCheat.MaxTravelSpeed is a teleport exploit.
+local function tooFast(player, plot, carry)
+	if not Config.AntiCheat.Enabled or not carry.StartPos or not carry.StartedAt then return false end
+	local distance = (plot.Deposit.Position - carry.StartPos).Magnitude
+	local elapsed = os.clock() - carry.StartedAt
+	return elapsed < distance / Config.AntiCheat.MaxTravelSpeed
+end
+
 function PresentService.TryDeposit(player, plot)
 	local profile = Data().GetProfile(player)
 	local carry = Registry.Get("CarryService").Get(player)
 	if not profile or not carry or plot.Owner ~= player then return end
+	if tooFast(player, plot, carry) then
+		profile.Stats.Flags = (profile.Stats.Flags or 0) + 1
+		warn(string.format("[AntiCheat] %s deposited too fast (flag #%d)", player.Name, profile.Stats.Flags))
+		Notify().Notify(player, "Whoa, too fast! Walk your present to the pad.", "error")
+		Registry.Get("CarryService").Drop(player, "anticheat")
+		return
+	end
 	if carry.Kind == "Box" then
 		unwrapBox(player, plot, profile, carry)
 	else
@@ -399,6 +424,7 @@ function PresentService.Collect(player, plot)
 	Data().AddCash(player, pile)
 	profile.Stats.CashCollected = (profile.Stats.CashCollected or 0) + pile
 	Quests().Progress(player, "Collect", pile)
+	Registry.Get("TutorialService").Complete(player, "Collect")
 	Notify().Effect("Cash", plot.Collect.Position, { Amount = pile })
 	Plots().SendBaseState(player)
 end

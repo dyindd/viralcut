@@ -207,7 +207,13 @@ Config.Events = {
 		  Color = Color3.fromRGB(180, 40, 60), Description = "Locks are HALF as long. Cursed presents can appear." },
 		{ Key = "LuckyHour", Name = "LUCKY HOUR", Duration = 120, Weight = 20,
 		  Color = Color3.fromRGB(255, 220, 80), Description = "Everyone has 2x luck!" },
+		{ Key = "DoubleCash", Name = "DOUBLE CASH", Duration = 120, Weight = 20,
+		  Color = Color3.fromRGB(120, 255, 120), Description = "All presents earn 2x for 2 minutes!" },
+		{ Key = "MutationMadness", Name = "MUTATION MADNESS", Duration = 90, Weight = 15,
+		  Color = Color3.fromRGB(255, 120, 255), Description = "Every mutation is 3x more likely!" },
 	},
+	DoubleCash = { Multiplier = 2 },
+	MutationMadness = { Multiplier = 3 },
 	SleighDrop = { SackCount = 10, DropHeight = 60, Radius = 90 },
 	KrampusNight = { LockMultiplier = 0.5, CursedChance = 15 }, -- percent chance an unwrap is Cursed
 	LuckyHour = { LuckMultiplier = 2 },
@@ -357,6 +363,56 @@ Config.Sounds = {
 }
 
 ---------------------------------------------------------------------------
+-- 16. REDEEM CODES  (share these on TikTok / YouTube; each player can use each code once)
+--     Reward keys: Cash, Snowflakes, Box (tier key), Luck (minutes). Expires = { year, month, day } UTC (optional)
+---------------------------------------------------------------------------
+Config.Codes = {
+	LAUNCH   = { Cash = 500, Snowflakes = 10 },
+	XMAS2026 = { Box = "Large", Snowflakes = 25, Expires = { 2027, 1, 2 } },
+	GRINCH   = { Luck = 30 },
+	TIKTOK   = { Cash = 1000, Snowflakes = 15 },
+	FREEBOX  = { Box = "Medium" },
+}
+
+---------------------------------------------------------------------------
+-- 17. TUTORIAL (first-join objectives; finishing all of them pays the reward)
+---------------------------------------------------------------------------
+Config.Tutorial = {
+	Enabled = true,
+	Steps = {
+		{ Key = "Buy",     Text = "Buy a box from the conveyor in the middle (hold E)" },
+		{ Key = "Unwrap",  Text = "Carry it to the GREEN pad at your base to unwrap it" },
+		{ Key = "Collect", Text = "Touch the GOLD pad at your base to collect cash" },
+		{ Key = "Lock",    Text = "Lock your base so nobody can steal (press L)" },
+		{ Key = "Train",   Text = "Train at your bench so you can carry bigger boxes" },
+		{ Key = "Steal",   Text = "Steal a present from another base and bring it home!" },
+	},
+	Reward = { Box = "Large", Snowflakes = 30 },
+}
+
+---------------------------------------------------------------------------
+-- 18. LEADERBOARDS (global, OrderedDataStore)
+---------------------------------------------------------------------------
+Config.Leaderboard = {
+	Enabled = true,
+	WriteInterval = 60,      -- seconds between score uploads per server
+	ReadInterval = 90,       -- seconds between board refreshes
+	Top = 10,
+	Boards = {
+		{ Key = "Cash",     Store = "SAP_LB_Cash",     Title = "💵 Most Cash Earned", Stat = "CashCollected" },
+		{ Key = "Rebirths", Store = "SAP_LB_Rebirths", Title = "🔄 Most Rebirths",    Stat = "Rebirths" },
+	},
+}
+
+---------------------------------------------------------------------------
+-- 19. ANTI-CHEAT
+---------------------------------------------------------------------------
+Config.AntiCheat = {
+	Enabled = true,
+	MaxTravelSpeed = 60,     -- studs/second; a deposit that implies faster travel than this is refused (teleport exploits)
+}
+
+---------------------------------------------------------------------------
 -- 15. RATE LIMITS / ANTI-EXPLOIT
 ---------------------------------------------------------------------------
 Config.RateLimits = {
@@ -367,6 +423,7 @@ Config.RateLimits = {
 	Gift = { Calls = 1, Per = 5 },
 	Claim = { Calls = 5, Per = 5 },
 	Throw = { Calls = 3, Per = 1 },
+	Code = { Calls = 3, Per = 10 },
 }
 Config.MaxInteractDistance = 12               -- generic distance check for prompts/pads
 Config.KickOnDataFail = true                  -- kick instead of letting someone play with no data

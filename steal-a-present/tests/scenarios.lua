@@ -69,7 +69,7 @@ local function buyBox(p, tierKey)
 	return box
 end
 local function deposit(p)
-	Sched.advance(0.5)
+	Sched.advance(5) -- walking from the belt to a base takes a few seconds (anti-teleport check)
 	local pl = plot(p)
 	Engine.teleport(p, pl.Deposit.Position + Vector3.new(0, 3, 0))
 	Engine.touch(pl.Deposit, p)
@@ -679,6 +679,131 @@ test("present conservation across all flows (no dupes, no losses)", function()
 	end
 end)
 
+---------------------------------------------------------------- new systems
+test("anti-teleport: depositing a stolen present instantly is refused and it returns home", function()
+	emptyHands(p1) emptyHands(p2)
+	profile(p2).Strength = 1000
+	if #profile(p1).Presents == 0 then forceRarity("Common") Data.AddCash(p1, 100) buyBox(p1, "Small") deposit(p1) resetRolls() end
+	local target = profile(p1).Presents[1]
+	local model = plot(p1).PresentModels[target.Id]
+	Engine.teleport(p2, model.PrimaryPart.Position + Vector3.new(0, 0, 3))
+	Engine.trigger(model.PrimaryPart.StealPrompt, p2)
+	truthy(Carry.IsCarrying(p2), "stole it")
+	-- teleport straight to the pad and touch it immediately
+	local pl = plot(p2)
+	Engine.teleport(p2, pl.Deposit.Position + Vector3.new(0, 3, 0))
+	Engine.touch(pl.Deposit, p2)
+	truthy(not Carry.IsCarrying(p2), "carry cleared")
+	eq(#profile(p2).Presents + 0, #profile(p2).Presents, "")
+	truthy(plot(p1).PresentModels[target.Id], "present returned to the owner")
+	eq(profile(p2).Stats.Flags, 1, "flagged once")
+	-- a legit (slow) deposit still works
+	Engine.teleport(p2, model.PrimaryPart.Position + Vector3.new(0, 0, 3))
+	Sched.advance(1)
+	Engine.trigger(plot(p1).PresentModels[target.Id].PrimaryPart.StealPrompt, p2)
+	truthy(Carry.IsCarrying(p2), "stole again")
+	local n2 = #profile(p2).Presents
+	deposit(p2)
+	eq(#profile(p2).Presents, n2 + 1, "slow deposit accepted")
+end)
+
+test("redeem codes: once per player, unknown/expired rejected, rewards granted", function()
+	local cash, sf = profile(p1).Cash, profile(p1).Snowflakes
+	Engine.fireServer(Remotes.RedeemCode, p1, "launch")
+	eq(profile(p1).Cash, cash + Config.Codes.LAUNCH.Cash)
+	eq(profile(p1).Snowflakes, sf + Config.Codes.LAUNCH.Snowflakes)
+	truthy(profile(p1).CodesUsed.LAUNCH, "marked used")
+	Sched.advance(1)
+	Engine.fireServer(Remotes.RedeemCode, p1, "LAUNCH")
+	eq(profile(p1).Cash, cash + Config.Codes.LAUNCH.Cash, "not twice")
+	Sched.advance(1)
+	Engine.fireServer(Remotes.RedeemCode, p1, "NOTACODE")
+	eq(profile(p1).Cash, cash + Config.Codes.LAUNCH.Cash)
+	Sched.advance(11)
+	local pickups = #workspace.World.Pickups:GetChildren()
+	Engine.fireServer(Remotes.RedeemCode, p1, "free-box")
+	eq(#workspace.World.Pickups:GetChildren(), pickups + 1, "box delivered")
+	Config.Codes.OLD = { Cash = 1, Expires = { 2020, 1, 1 } }
+	Sched.advance(1)
+	Engine.fireServer(Remotes.RedeemCode, p1, "OLD")
+	truthy(not profile(p1).CodesUsed.OLD, "expired not usable")
+	Engine.fireServer(Remotes.RedeemCode, p1, 12345)
+	Engine.fireServer(Remotes.RedeemCode, p1, string.rep("A", 500))
+end)
+
+test("tutorial: steps complete in any order, finishing pays the reward, HUD shows next step", function()
+	local tut = profile(p1).Tutorial
+	truthy(tut.Completed.Buy and tut.Completed.Unwrap and tut.Completed.Collect and tut.Completed.Lock and tut.Completed.Train, "earlier actions counted")
+	truthy(not tut.Finished, "not finished before stealing")
+	local Tutorial = Registry.Get("TutorialService")
+	local sf = profile(p1).Snowflakes
+	local pickups = #workspace.World.Pickups:GetChildren()
+	Tutorial.Complete(p1, "Nope")
+	truthy(not profile(p1).Tutorial.Finished)
+	Tutorial.Complete(p1, "Steal")
+	truthy(profile(p1).Tutorial.Finished, "finished")
+	eq(profile(p1).Snowflakes, sf + Config.Tutorial.Reward.Snowflakes)
+	eq(#workspace.World.Pickups:GetChildren(), pickups + 1, "reward box")
+	Tutorial.Complete(p1, "Buy") -- no effect after finishing
+	eq(profile(p1).Snowflakes, sf + Config.Tutorial.Reward.Snowflakes)
+end)
+
+test("Double Cash event doubles income while active, reverts after", function()
+	if #profile(p1).Presents == 0 then forceRarity("Rare") Data.AddCash(p1, 100) buyBox(p1, "Small") deposit(p1) resetRolls() end
+	local base = plot(p1).IncomePerSec
+	truthy(base > 0)
+	for _, def in ipairs(Config.Events.List) do if def.Key == "DoubleCash" then Events.StartEvent(def) end end
+	near(plot(p1).IncomePerSec, base * 2, 1e-6, "doubled")
+	Sched.advance(125)
+	near(plot(p1).IncomePerSec, base, 1e-6, "back to normal")
+end)
+
+test("Mutation Madness triples mutation chances", function()
+	for _, def in ipairs(Config.Events.List) do if def.Key == "MutationMadness" then Events.StartEvent(def) end end
+	local hits, trials = 0, 600
+	for _ = 1, trials do if Presents.RollMutation() then hits = hits + 1 end end
+	truthy(hits / trials > 0.30, "mutation rate during madness " .. hits / trials)
+	Sched.advance(100)
+end)
+
+test("global leaderboards: scores uploaded and boards show names", function()
+	local LB = Registry.Get("LeaderboardService")
+	profile(p1).Stats.CashCollected = 123456
+	profile(p2).Stats.CashCollected = 99
+	LB.WriteAll()
+	LB.Refresh()
+	local board = workspace.World.Hub.Leaderboards.CashBoard.BoardGui
+	truthy(board.Row1.Text:find("Alice"), "row1: " .. board.Row1.Text)
+	truthy(board.Row1.Text:find("123k"), "formatted score")
+	truthy(board.Row2.Text:find("Bob"), "row2: " .. board.Row2.Text)
+	truthy(board.Row3.Text:find("%-%-%-"), "empty rows dashed")
+end)
+
+test("VIP tag appears over VIP owners and nobody else", function()
+	local Monet = Registry.Get("MonetizationService")
+	Monet.ApplyVIPTag(p1)
+	truthy(not p1.Character:FindFirstChild("VIPTag"), "no tag without the pass")
+	profile(p1).Gamepasses.VIP = true
+	Monet.ApplyVIPTag(p1)
+	truthy(p1.Character:FindFirstChild("VIPTag"), "tag with the pass")
+	profile(p1).Gamepasses.VIP = nil
+	Monet.ApplyVIPTag(p1)
+	truthy(not p1.Character:FindFirstChild("VIPTag"), "tag removed")
+end)
+
+test("seasonal sets only drop in season", function()
+	local Seasons = require(RS.Shared.Seasons)
+	local jan = os.time({ year = 2027, month = 1, day = 10, hour = 12 })
+	local pool = Seasons.GetDroppablePresents("Secret", jan)
+	local keys = {}
+	for _, p in ipairs(pool) do keys[p.Key] = true end
+	truthy(keys.BallDrop and keys.GrinchHeart and not keys.SantasSleigh, "New Year + Classic secrets only")
+	local feb = os.time({ year = 2027, month = 2, day = 14, hour = 12 })
+	keys = {}
+	for _, p in ipairs(Seasons.GetDroppablePresents("Mythic", feb)) do keys[p.Key] = true end
+	truthy(keys.HeartOfGold and not keys.TimeCapsule, "Valentine's mythics in Feb")
+end)
+
 ---------------------------------------------------------------- CLIENT
 test("client boots: HUD, panels, toasts; reacts to server state", function()
 	Engine.bootClient(p1)
@@ -707,6 +832,33 @@ test("client: every panel opens and renders without errors", function()
 	Sched.advance(0.5)
 	local shop = HUD.GetPanel("Shop")
 	truthy(not shop.Root.Visible, "closed")
+	-- odds tab renders every tier
+	HUD.OpenPanel("Index")
+	local index = HUD.GetPanel("Index")
+	local tabsBar = index.Content:FindFirstChild("Tabs")
+	truthy(tabsBar, "index has tabs")
+	for _, b in ipairs(tabsBar:GetChildren()) do
+		if b:IsA("TextButton") and b.Label.Text:find("Odds") then b.Activated:Fire() end
+	end
+	Sched.advance(0.2)
+	local cards = 0
+	for _, c in ipairs(index.Content:GetChildren()) do
+		if c:IsA("ScrollingFrame") and c.Visible then
+			for _, k in ipairs(c:GetChildren()) do if k:IsA("Frame") then cards = cards + 1 end end
+		end
+	end
+	eq(cards, #Config.BoxTiers, "one odds card per tier")
+	-- tutorial card visible for an unfinished tutorial, hidden when finished
+	local State = require(game:GetService("StarterPlayer").StarterPlayerScripts.Client.State)
+	local snapshot = Data.Snapshot(p1)
+	snapshot.Tutorial = { Completed = { Buy = true }, Finished = false }
+	State.Set("Profile", snapshot)
+	truthy(HUD.ObjectiveCard.Visible, "objective card shown")
+	truthy(HUD.ObjectiveText.Text:find("GREEN pad"), "next step text: " .. HUD.ObjectiveText.Text)
+	snapshot.Tutorial = { Completed = {}, Finished = true }
+	State.Set("Profile", snapshot)
+	truthy(not HUD.ObjectiveCard.Visible, "hidden when finished")
+	HUD.CloseAll()
 end)
 
 test("client: unwrap popup, carry card, toasts, grinch overlay react to remotes", function()

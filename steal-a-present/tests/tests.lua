@@ -150,5 +150,35 @@ test("traps and events are well formed", function()
 	assert(Config.Grinch.SurviveBoxTier and Config.PlaytimeGift.Tier)
 end)
 
+test("codes, tutorial, leaderboard and new events are well formed", function()
+	for code, def in pairs(Config.Codes) do
+		assert(code == code:upper() and not code:find("[^%w]"), "code must be alphanumeric uppercase: " .. code)
+		assert(def.Cash or def.Snowflakes or def.Box or def.Luck, code .. " gives nothing")
+		if def.Box then
+			local found = false
+			for _, t in ipairs(Config.BoxTiers) do if t.Key == def.Box then found = true end end
+			assert(found, code .. " unknown box " .. def.Box)
+		end
+		if def.Expires then assert(#def.Expires == 3, code .. " bad Expires") end
+	end
+	local seen = {}
+	for _, step in ipairs(Config.Tutorial.Steps) do
+		assert(not seen[step.Key] and step.Text, "tutorial step " .. tostring(step.Key))
+		seen[step.Key] = true
+	end
+	assert(seen.Buy and seen.Unwrap and seen.Collect and seen.Lock and seen.Train and seen.Steal)
+	for _, b in ipairs(Config.Leaderboard.Boards) do assert(b.Key and b.Store and b.Title and b.Stat) end
+	local keys = {}
+	for _, e in ipairs(Config.Events.List) do keys[e.Key] = true end
+	assert(keys.DoubleCash and keys.MutationMadness and keys.SleighDrop)
+	assert(Config.AntiCheat.MaxTravelSpeed > Config.Carry.BaseWalkSpeed * 2, "anti-cheat speed must leave headroom over sprint/knockback")
+	-- every seasonal set referenced by a season has at least one present
+	for _, season in ipairs(Catalog.Seasons) do
+		local n = 0
+		for _, p in ipairs(Catalog.Presents) do if p.Set == season.Set then n = n + 1 end end
+		assert(n >= 5, season.Key .. " set has only " .. n .. " presents")
+	end
+end)
+
 print(string.format("%d passed, %d failed", passed, failed))
 if failed > 0 then error("tests failed") end

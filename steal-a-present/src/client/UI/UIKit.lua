@@ -132,6 +132,31 @@ function UIKit.Text(props)
 	return label
 end
 
+-- Text input (codes etc.)
+function UIKit.TextBox(props)
+	local box = UIKit.Create("TextBox", {
+		Name = props.Name or "Input",
+		Size = props.Size or UDim2.new(0, 260, 0, 48),
+		Position = props.Position or UDim2.new(0, 0, 0, 0),
+		AnchorPoint = props.AnchorPoint or Vector2.new(0, 0),
+		BackgroundColor3 = Theme.Colors.PanelInner,
+		Font = Theme.Font,
+		Text = "",
+		PlaceholderText = props.Placeholder or "",
+		PlaceholderColor3 = Theme.Colors.TextMuted,
+		TextColor3 = Theme.Colors.TextDark,
+		TextSize = props.TextSize or 24,
+		ClearTextOnFocus = false,
+		ZIndex = props.ZIndex or 14,
+		LayoutOrder = props.LayoutOrder or 0,
+		Parent = props.Parent,
+	})
+	UIKit.Corner(box, Theme.CornerSmall)
+	UIKit.Stroke(box, Theme.StrokeThin)
+	UIKit.Padding(box, 6)
+	return box
+end
+
 ---------------------------------------------------------------------------
 -- Buttons
 ---------------------------------------------------------------------------

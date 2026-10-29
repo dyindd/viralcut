@@ -71,6 +71,11 @@ local function grantReward(player, profile, reward)
 	return "a reward"
 end
 
+-- Public: used by codes, the tutorial and anything else that hands out a reward table
+function RetentionService.Grant(player, profile, reward)
+	return grantReward(player, profile, reward)
+end
+
 local function onClaimStreak(player)
 	if not RateLimiter.Check(player, "Claim") then return end
 	local profile = Data().GetProfile(player)

@@ -269,6 +269,7 @@ function PlotService.Lock(player)
 	setDome(plot, true)
 	profile.Stats.Locks = (profile.Stats.Locks or 0) + 1
 	Registry.Get("QuestService").Progress(player, "Lock", 1)
+	Registry.Get("TutorialService").Complete(player, "Lock")
 	Notify.Notify(player, "Base locked for " .. Util.FormatTime(duration) .. "!", "success")
 	PlotService.SendBaseState(player)
 	PlotService.UpdateSign(plot)

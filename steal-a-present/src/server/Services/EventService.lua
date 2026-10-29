@@ -58,6 +58,20 @@ function EventService.GetLuckMultiplier()
 	return 1
 end
 
+function EventService.GetIncomeMultiplier()
+	if EventService.IsActive("DoubleCash") then
+		return Config.Events.DoubleCash.Multiplier
+	end
+	return 1
+end
+
+function EventService.GetMutationChanceMultiplier()
+	if EventService.IsActive("MutationMadness") then
+		return Config.Events.MutationMadness.Multiplier
+	end
+	return 1
+end
+
 function EventService.GetLockMultiplier()
 	if EventService.IsActive("KrampusNight") then
 		return Config.Events.KrampusNight.LockMultiplier
@@ -86,12 +100,14 @@ function EventService.StartEvent(def)
 	if def.Key == "SleighDrop" then
 		sleighDrop()
 	end
+	Registry.Get("PresentService").RecalcAll()
 	local endsAt = active.EndsAt
 	task.delay(def.Duration, function()
 		if active and active.EndsAt == endsAt then
 			active = nil
 			nextAt = now() + rng:NextInteger(Config.Events.MinInterval, Config.Events.MaxInterval)
 			broadcast()
+			Registry.Get("PresentService").RecalcAll()
 		end
 	end)
 end

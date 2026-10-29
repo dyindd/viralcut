@@ -156,6 +156,8 @@ function CarryService.Give(player, carry)
 		carry.Model:Destroy()
 		return false
 	end
+	carry.StartedAt = os.clock()
+	carry.StartPos = root.Position
 	carries[player] = carry
 	CarryService.ApplySpeed(player)
 	sendState(player)

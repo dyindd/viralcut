@@ -61,6 +61,8 @@ local function template()
 		PlaytimeGift = { Progress = 0 },
 		Pile = 0,             -- uncollected cash sitting at the base
 		Traps = {},           -- ["1"] = "IcePatch"
+		CodesUsed = {},       -- [code] = unix time
+		Tutorial = { Completed = {}, Finished = false },
 		LastOnline = 0,
 		FirstJoin = os.time(),
 		Joins = 0,

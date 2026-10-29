@@ -127,7 +127,7 @@ function HUD.Build()
 
 	------------------------------------------------------------------ top-left: currencies + base status
 	-- IgnoreGuiInset is on, so keep clear of Roblox's own top bar (~58px) ourselves
-	local topLeft = makeDock("TopLeft", Vector2.new(0, 0), UDim2.new(0, 14, 0, 66), UDim2.new(0, 280, 0, 260))
+	local topLeft = makeDock("TopLeft", Vector2.new(0, 0), UDim2.new(0, 14, 0, 66), UDim2.new(0, 290, 0, 360))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = topLeft })
 	HUD.CashPill = currencyPill(topLeft, "💵", Theme.Colors.Green, 1)
 	HUD.SnowPill = currencyPill(topLeft, "❄️", Theme.Colors.Cyan, 2)
@@ -138,6 +138,14 @@ function HUD.Build()
 	UIKit.Corner(baseLine, 10)
 	HUD.BaseLine = UIKit.Text({ Text = "🏠 Pile $0  ·  0/6 slots", TextSize = 20, Scaled = true, MaxTextSize = 20, XAlign = Enum.TextXAlignment.Left, Parent = baseLine })
 	UIKit.Padding(baseLine, 6)
+	-- objective card (tutorial): hidden once the tutorial is finished
+	local objective = UIKit.Create("Frame", { Size = UDim2.new(0, 280, 0, 96), BackgroundColor3 = Theme.Colors.Panel, LayoutOrder = 5, Visible = false, Parent = topLeft })
+	UIKit.Corner(objective, 14)
+	UIKit.Stroke(objective, Theme.Stroke)
+	HUD.ObjectiveCard = objective
+	HUD.ObjectiveTitle = UIKit.Text({ Text = "🎯 OBJECTIVE 1/6", Size = UDim2.new(1, -16, 0, 28), Position = UDim2.new(0, 8, 0, 6), TextSize = 22, XAlign = Enum.TextXAlignment.Left, Color = Theme.Colors.Orange, StrokeThickness = 2, ZIndex = 3, Parent = objective })
+	HUD.ObjectiveText = UIKit.Text({ Text = "", Size = UDim2.new(1, -16, 0, 40), Position = UDim2.new(0, 8, 0, 34), TextSize = 17, Scaled = true, MaxTextSize = 17, Wrapped = true, XAlign = Enum.TextXAlignment.Left, Color = Theme.Colors.TextDark, Stroke = false, ZIndex = 3, Parent = objective })
+	HUD.ObjectiveBar = UIKit.ProgressBar({ Size = UDim2.new(1, -16, 0, 12), Position = UDim2.new(0, 8, 1, -18), Color = Theme.Colors.Orange, TextSize = 10, ZIndex = 3, Parent = objective })
 
 	------------------------------------------------------------------ left column
 	local left = makeDock("Left", Vector2.new(0, 0.5), UDim2.new(0, 14, 0.5, 30), UDim2.new(0, 110, 0, 480))
@@ -227,6 +235,20 @@ local function updateProfile(profile)
 	HUD.RewardsBadge.Visible = ready > 0
 	HUD.RewardsBadgeText.Text = tostring(ready)
 	buttons.Rewards.SetBadge(ready > 0 and ready or nil)
+	-- tutorial objective
+	local tut = profile.Tutorial
+	if Config.Tutorial.Enabled and tut and not tut.Finished then
+		local done, nextStep = 0, nil
+		for _, step in ipairs(Config.Tutorial.Steps) do
+			if tut.Completed[step.Key] then done = done + 1 elseif not nextStep then nextStep = step end
+		end
+		HUD.ObjectiveCard.Visible = true
+		HUD.ObjectiveTitle.Text = "🎯 OBJECTIVE " .. (done + 1) .. "/" .. #Config.Tutorial.Steps
+		HUD.ObjectiveText.Text = nextStep and nextStep.Text or ""
+		HUD.ObjectiveBar.Set(done / #Config.Tutorial.Steps, "")
+	else
+		HUD.ObjectiveCard.Visible = false
+	end
 end
 
 local function updateBase(base)
