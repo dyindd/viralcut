@@ -17,16 +17,22 @@ limited-time event (urgency). Dates assume a **December 1, 2026** launch; the Ch
 * Weekly drops (Dec 8, 15, 22): add 2–3 new presents each week (one line each in `Catalog.Presents`). New index entries = new reasons to open boxes.
 
 ## Phase 2 — New Year's update (Jan 2 → Feb 1)
-* **Content:** "NewYear" set (Set = "NewYear"): Party Popper (Common), Disco Ball (Uncommon), Champagne Tower (Rare), Countdown Clock (Epic), Golden Fireworks (Legendary), Time Capsule (Mythic), Ball Drop (Secret). Re-skin the calendar as "Party Calendar" (already in `Catalog.Seasons`).
+* **Content:** ✅ already in `Catalog.Presents` (Set = "NewYear"): Party Popper, Disco Ball, Champagne Tower, Countdown Clock, Golden Fireworks, Time Capsule, The Ball Drop. They start dropping automatically on Jan 2 (`Catalog.Seasons`); the calendar re-skins itself as "Party Calendar". Zero code needed for the season flip.
 * **Mechanic:** **Fireworks Launcher** at each base — spend Snowflakes to fire a firework that reveals the rarity of one box on the belt for 10 seconds (information as a resource; creates "sniping" moments).
 * **Event:** "Midnight Countdown" every real hour at :59 — a 60-second window where every unwrap has a guaranteed mutation. Players will set alarms.
 * **Retention:** Resolutions = weekly quests (7-day goals with a Giant Box reward) on top of dailies.
 
 ## Phase 3 — Valentine's update (Feb 1 → Mar 1)
-* **Content:** "Valentines" set: Love Letter, Chocolate Box, Teddy with Heart, Cupid's Bow (Epic), Diamond Ring (Legendary), Heart of Gold (Mythic), Cupid Himself (Secret).
+* **Content:** ✅ already in `Catalog.Presents` (Set = "Valentines"): Love Letter, Chocolate Box, Teddy with Heart, Cupid's Bow, Diamond Ring, Heart of Gold, Cupid Himself. Drops automatically Feb 1.
 * **Mechanic:** **Trading** (present-for-present, confirm-on-both-sides UI, 5 second cooldown + trade log). Trading is the biggest co-play driver in Adopt Me/Grow a Garden; by this point the index is big enough that trades are interesting.
 * **Event:** "Secret Santa… in February": the server pairs everyone; gifting your partner gives a 2x bonus. Pushes the intentional co-play signal.
 * **Monetization:** Valentine's cosmetic wraps (box skins) as a limited gamepass — pure cosmetics, no power.
+
+## Already built for live-ops (use them!)
+* **Codes** (`Config.Codes`): drop a new code in every TikTok. Expire the old ones with `Expires`.
+* **Events** are data: add a row to `Config.Events.List` for a weekend special.
+* **Global leaderboards** give the top players a reason to post their rank.
+* **Tutorial objectives** protect first-play bounce; edit the wording in `Config.Tutorial.Steps` if analytics show a drop at a specific step.
 
 ## Always-on cadence
 | Cadence | What |

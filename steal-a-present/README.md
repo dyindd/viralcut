@@ -11,6 +11,8 @@ Everything is code: the map, the UI, the tools. Press Play and it runs. Swap in 
 * `docs/BALANCING.md` — the economy numbers, the pacing simulation, and how to tune
 * `docs/ROADMAP.md` — 3-month live-ops plan (Christmas launch, New Year's, Valentine's)
 * `docs/STUDIO_CHECKLIST.md` — the manual steps: API access, gamepass/product IDs, sounds, art, publishing
+* `docs/TESTING.md` — how the headless test engine runs the real server + client here, and how to add scenarios
+* `docs/LAUNCH.md` — icon/thumbnail/title advice, the launch codes, and 10 clip ideas for TikTok
 
 ---
 
@@ -73,8 +75,11 @@ src/
       QuestService        3 daily quests (deterministic per day+player)
       IndexService        collection book + set-completion rewards
       GiftService         gift a present to someone in your server (co-play hook)
-      MonetizationService gamepass cache + ProcessReceipt with receipt dedupe
+      MonetizationService gamepass cache + ProcessReceipt with receipt dedupe, VIP tag
       LeaderstatsService  player-list stats
+      CodeService         redeem codes (Config.Codes)
+      TutorialService     first-join objectives + completion reward
+      LeaderboardService  global top-10 boards in the hub (OrderedDataStore)
       NotifyService       toasts / announcements / world effects helpers
 
   client/   (StarterPlayerScripts.Client)
@@ -86,12 +91,16 @@ src/
     UI/Toasts.lua      announcements + notifications
     UI/UnwrapPopup.lua the unwrap reveal
     UI/GrinchOverlay.lua
-    UI/Panels/         Shop, Index, Quests, Rewards (calendar + playtime gift), Rebirth, Base (sell), Gift, Traps, Settings
+    UI/Panels/         Shop, Index (collection + box odds), Quests, Rewards (calendar + playtime gift), Rebirth, Base (sell), Gift, Traps, Settings (+ codes)
     Controllers/       Input (Q drop, L lock, snowball aim), Prompt (hide prompts that aren't yours), Sound, Effects
 
 tests/
-  tests.lua + run_tests.py   logic tests for the shared modules (run: python3 tests/run_tests.py, needs `pip install lupa`)
+  tests.lua + run_tests.py        logic tests for the shared modules
+  scenarios.lua + run_scenarios.py 44 end-to-end scenarios: the REAL server and client running in a headless engine
+  engine/                          the mini Roblox runtime (see docs/TESTING.md)
+  econ_sim.py                      pacing simulation (reads the real Config)
 ```
+All three need `pip install lupa` (a Lua VM for Python). No Roblox Studio required.
 
 ### How a box becomes money (the core loop in code)
 1. `ConveyorService` spawns a box (tier only, no rarity) → player holds E → `CarryService.Give`.
@@ -121,12 +130,18 @@ Open `src/shared/Config.lua`. Some examples:
 | Gamepass / product IDs | `Config.Monetization` |
 | Lock duration / cooldown | `Config.Lock` |
 | Rebirth cost curve | `Config.Rebirth` |
+| Add / expire a redeem code | `Config.Codes` (uppercase, alphanumeric; optional `Expires = {y, m, d}`) |
+| Change the tutorial steps or reward | `Config.Tutorial` |
+| Leaderboard boards | `Config.Leaderboard.Boards` |
+| Anti-teleport strictness | `Config.AntiCheat.MaxTravelSpeed` (studs/s) |
 | Wipe all player data | change `Config.DataStoreName` |
 
-After editing, run the tests:
+After editing, run the tests (the scenario suite boots the whole game headlessly):
 ```bash
 pip install lupa
 python3 tests/run_tests.py
+python3 tests/run_scenarios.py
+python3 tests/econ_sim.py
 ```
 
 ---
@@ -142,6 +157,8 @@ python3 tests/run_tests.py
 * Every remote is rate-limited (`RateLimiter`) and validated (`Validate`: types, NaN, distance, ownership).
 * Profiles are session-locked in the DataStore; a present being stolen lives in a server-side "transit" table, so two players can never both own it, and an owner leaving reclaims it before their save.
 * Dev products are granted once per receipt id and only confirmed after a successful save.
+* Deposits that imply travelling faster than `Config.AntiCheat.MaxTravelSpeed` (teleport exploits) are refused and the present goes home; the player is flagged in `Stats.Flags`.
+* Stealing is strength-gated (2x the present's weight), so a brand-new account can't be farmed for its Legendary by a veteran unless the veteran is the Grinch.
 
 ## 6. What's stubbed or placeholder
 * **Art**: boxes, presents, traps, the map and the tools are generated Parts. Drop models into `ReplicatedStorage.Models.*` to replace them (see `docs/STUDIO_CHECKLIST.md`).

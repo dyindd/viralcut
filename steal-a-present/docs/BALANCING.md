@@ -85,6 +85,12 @@ Every 8 minutes, 60 seconds, needs 2+ players. Assist $150 per hit, $600 for the
 box for surviving — all scaled by `(1 + rebirths × 0.5)` so it matters at every stage. If live data shows
 the Grinch surviving more than ~60% of rounds, lower `WalkSpeed` (30) before touching `HitsToDefeat` (3).
 
+### Server events (`Config.Events`)
+Every 7–12 minutes, weighted: Blizzard (Frosted x10), Aurora (Rainbow x10), Sleigh Drop (10 free Santa's Sacks),
+Krampus Night (locks half as long, Cursed presents), Lucky Hour (2x luck), **Double Cash** (income x2 for 2 min) and
+**Mutation Madness** (every mutation 3x as likely). Double Cash is the one to watch: with a strong base it is worth
+more than any single box, which is exactly why players stay for "one more event".
+
 ### Retention rewards
 * Calendar: 25 days, escalating from $250 to two Giant boxes. Days 7/14/21 give Luck time. Total value of a
   full streak ≈ 4–5 hours of mid-game income — worth logging in for, not worth not playing for.

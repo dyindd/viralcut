@@ -18,6 +18,9 @@ The code builds the whole map at runtime, so the only manual work is settings, I
 11. **Experience settings**: genre "Simulator / Tycoon", enable all devices (the UI scales for phones), age guidelines questionnaire, enable "Allow Private Servers" if you want (optional).
 12. **Season dates**: check `Catalog.Seasons` — Christmas is Nov 20 → Jan 2 (UTC). Change them if your launch moves.
 13. **Wipe test data before launch** by changing `Config.DataStoreName` (e.g. `SAP_Profiles_v2`). Everyone starts fresh.
+14. **Leaderboards** use OrderedDataStores named in `Config.Leaderboard.Boards`; they need the same API access as saving. To reset them, rename the stores.
+15. **Codes**: the launch codes are in `Config.Codes` (LAUNCH, XMAS2026, GRINCH, TIKTOK, FREEBOX). Change them before you publish if you don't want everyone to have them on day one. Players enter them in Settings.
+16. **Run the tests before every update**: `python3 tests/run_scenarios.py` boots the real server and client here, no Studio needed (see `docs/TESTING.md`).
 
 ## Optional but recommended
 * Add a `Lighting` Atmosphere / SkyBox for the winter look (the project JSON only sets brightness/ambient).
