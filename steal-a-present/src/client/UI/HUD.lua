@@ -47,6 +47,17 @@ function HUD.UpdateScale()
 		if s then s.Scale = scale end
 	end
 	UIKit.PanelScale = math.clamp(math.min(vp.X / 920, vp.Y / 640), 0.45, 1)
+	-- the left icon column sits right under the top-left stack (currencies + base line + objective card)
+	-- and shrinks further if it would run into the bottom bar
+	local topLeft, left = docks.TopLeft, docks.Left
+	if topLeft and left then
+		local topBottom = 66 + 340 * scale
+		left.Position = UDim2.new(0, 14, 0, topBottom + 6)
+		local room = vp.Y - 120 * scale - (topBottom + 6)
+		local leftScale = math.clamp(math.min(scale, room / 498), 0.4, scale)
+		local s = left:FindFirstChildOfClass("UIScale")
+		if s then s.Scale = leftScale end
+	end
 	for _, panel in pairs(panels) do
 		if panel.Root then
 			local s = panel.Root:FindFirstChildOfClass("UIScale")
@@ -153,7 +164,7 @@ function HUD.Build()
 	HUD.ObjectiveBar = UIKit.ProgressBar({ Size = UDim2.new(1, -16, 0, 12), Position = UDim2.new(0, 8, 1, -18), Color = Theme.Colors.Orange, TextSize = 10, ZIndex = 3, Parent = objective })
 
 	------------------------------------------------------------------ left column
-	local left = makeDock("Left", Vector2.new(0, 0.5), UDim2.new(0, 14, 0.5, 30), UDim2.new(0, 110, 0, 480))
+	local left = makeDock("Left", Vector2.new(0, 0), UDim2.new(0, 14, 0, 400), UDim2.new(0, 110, 0, 498))
 	UIKit.Create("UIListLayout", { Padding = UDim.new(0, 14), SortOrder = Enum.SortOrder.LayoutOrder, Parent = left })
 	buttons.Rewards = UIKit.IconButton({ Image = Icons.Get("UI", "Rewards"), Icon = "🎁", Label = "Rewards", Color = Theme.Colors.Pink, LayoutOrder = 1, Parent = left, OnClick = function() HUD.TogglePanel("Rewards") end })
 	buttons.Rebirth = UIKit.IconButton({ Image = Icons.Get("UI", "Rebirth"), Icon = "🔄", Label = "Rebirth", Color = Theme.Colors.Purple, LayoutOrder = 2, Parent = left, OnClick = function() HUD.TogglePanel("Rebirth") end })
